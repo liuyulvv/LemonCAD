@@ -1,5 +1,6 @@
 import { AxesViewer, Color4, Scene, Vector3, WebGPUEngine } from "@babylonjs/core";
 import LemonCamera from "./LemonCamera";
+import LemonPlaneEntity from "./LemonPlaneEntity";
 
 export default class LemonScene extends Scene {
   private camera: LemonCamera;
@@ -16,5 +17,14 @@ export default class LemonScene extends Scene {
     this.activeCamera = this.camera;
 
     new AxesViewer(this);
+
+    const topPlane = LemonPlaneEntity.topPlane();
+    topPlane.draw(true);
+
+    const frontPlane = LemonPlaneEntity.frontPlane();
+    frontPlane.draw(true);
+
+    const rightPlane = LemonPlaneEntity.rightPlane();
+    rightPlane.draw(true);
   }
 }
