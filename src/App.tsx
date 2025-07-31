@@ -1,86 +1,46 @@
-import { Logger } from "@babylonjs/core";
-import { useEffect, useRef } from "react";
-import LemonEngine from "./core/LemonEngine";
-import LemonScene from "./core/LemonScene";
+import { Layout } from "@arco-design/web-react";
+import LemonCanvas from "./components/LemonCanvas";
+import LemonLeftToolNavigation from "./components/LemonLeftToolNavigation";
+import LemonNavigation from "./components/LemonNavigation";
+import useLeftToolNavigationStore from "./store/LemonLeftToolNavigationStore";
 
-function LemonCanvas() {
-  const mainCanvas = useRef<HTMLCanvasElement>(null);
+const Sider = Layout.Sider;
+const Header = Layout.Header;
+const Footer = Layout.Footer;
+const Content = Layout.Content;
 
-  useEffect(() => {
-    Logger.LogLevels = Logger.ErrorLogLevel;
-
-    const { current: canvas } = mainCanvas;
-    if (!canvas) {
-      return;
-    }
-
-    let engine: LemonEngine;
-    let scene: LemonScene;
-
-    const initialize = async () => {
-      engine = new LemonEngine(canvas);
-      await engine.initAsync();
-      scene = new LemonScene(engine, canvas);
-      engine.runRenderLoop(() => {
-        scene.render();
-      });
-
-      const resizeCallback = () => {
-        engine.resize();
-      };
-
-      if (window) {
-        window.addEventListener("resize", resizeCallback);
-      }
-
-      engine.resize();
-
-      return () => {
-        scene.dispose();
-        engine.dispose();
-
-        if (window) {
-          window.removeEventListener("resize", resizeCallback);
-        }
-      };
-    };
-    const cleanupPromise = initialize();
-
-    return () => {
-      cleanupPromise
-        .then((cleanup) => {
-          if (cleanup) {
-            cleanup();
-          }
-        })
-        .catch((_err) => {
-          if (engine) {
-            engine.dispose();
-          }
-        });
-    };
-  }, []);
+export default function App() {
+  const { collapsed, setCollapsed } = useLeftToolNavigationStore();
 
   return (
-    <div
+    <Layout
       style={{
-        display: "flex",
-        flexDirection: "column",
         height: "100vh",
+        userSelect: "none",
       }}
     >
-      <canvas
-        ref={mainCanvas}
-        style={{
-          display: "flex",
-          flexGrow: "1",
-          flexShrink: "1",
-          outline: "none",
-        }}
-        tabIndex={0}
-      ></canvas>
-    </div>
+      <Sider onCollapse={setCollapsed} collapsed={collapsed}></Sider>
+      <Layout>
+        <Header>
+          <LemonNavigation />
+        </Header>
+        <Layout
+          style={{
+            display: "flex",
+            flexDirection: "row",
+          }}
+        >
+          <LemonLeftToolNavigation />
+          <Content
+            style={{
+              overflow: "hidden",
+            }}
+          >
+            <LemonCanvas />
+          </Content>
+        </Layout>
+        <Footer></Footer>
+      </Layout>
+    </Layout>
   );
 }
-
-export default LemonCanvas;
