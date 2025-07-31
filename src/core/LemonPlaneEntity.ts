@@ -8,8 +8,9 @@ export default class LemonPlaneEntity extends LemonEntity {
   private plane: LemonPlane | null = null;
   private drawNeedUpdate = true;
 
-  public constructor() {
+  public constructor(plane?: LemonPlane) {
     super();
+    this.plane = plane || null;
   }
 
   public static topPlane(): LemonPlaneEntity {
