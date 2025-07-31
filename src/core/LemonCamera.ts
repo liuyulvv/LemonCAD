@@ -65,7 +65,8 @@ class LemonArcRotateCameraPointersInput extends BaseCameraPointersInput {
 export default class LemonCamera extends ArcRotateCamera {
   public constructor(scene: Scene) {
     super("camera", Math.PI / 2, 0, 10, Vector3.Zero(), scene);
-    this.lowerBetaLimit = 0;
+    this.lowerBetaLimit = null;
+    this.upperBetaLimit = null;
     this.upVector = new Vector3(0, 0, 1);
 
     this.inputs.clear();
