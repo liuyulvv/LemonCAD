@@ -25,7 +25,7 @@ function LemonLeftToolNavigation() {
   };
 
   return (
-    <div style={{ position: "relative", display: "flex" }}>
+    <div style={{ display: "flex" }}>
       <div
         ref={containerRef}
         style={{

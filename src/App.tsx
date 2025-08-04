@@ -28,6 +28,7 @@ export default function App() {
           style={{
             display: "flex",
             flexDirection: "row",
+            height: "100%",
           }}
         >
           <LemonLeftToolNavigation />

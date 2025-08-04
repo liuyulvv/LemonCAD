@@ -64,16 +64,20 @@ export default function LemonCanvas() {
   return (
     <div
       style={{
-        display: "flex",
-        flexDirection: "column",
+        position: "relative",
+        flexGrow: "1",
+        width: "100%",
+        height: "100%",
       }}
     >
       <canvas
         ref={mainCanvas}
         style={{
-          display: "flex",
-          flexGrow: "1",
-          flexShrink: "1",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
           outline: "none",
         }}
         tabIndex={0}
