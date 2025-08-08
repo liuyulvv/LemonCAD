@@ -1,4 +1,4 @@
-import { Mesh, MeshBuilder } from "@babylonjs/core";
+import { Color3, MeshBuilder } from "@babylonjs/core";
 import { v4 as uuidv4 } from "uuid";
 import { LemonLine } from "../geom/LemonLine";
 import type LemonPoint from "../geom/LemonPoint";
@@ -28,7 +28,7 @@ export default class LemonLineEntity extends LemonEntity {
       this.drawNeedUpdate = true;
     }
     if (this.drawNeedUpdate) {
-      this.scene.removeMesh(this, true);
+      this.getChildMeshes().forEach((child) => child.dispose());
       const discreteness = this.line.discrete();
       const points: Array<LemonVector> = [];
       for (let i = 0; i < discreteness.vertices.length; i += 3) {
@@ -37,7 +37,11 @@ export default class LemonLineEntity extends LemonEntity {
       const lineMesh = MeshBuilder.CreateLines(uuidv4(), {
         points: points,
       });
-      Mesh.MergeMeshes([lineMesh], true);
+      lineMesh.color = Color3.FromHexString("#0099FF");
+      lineMesh.isPickable = false;
+      lineMesh.doNotSyncBoundingInfo = true;
+      this.addChild(lineMesh);
+      this.drawNeedUpdate = false;
       return;
     }
   }
