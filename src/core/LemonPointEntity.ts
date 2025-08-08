@@ -33,10 +33,18 @@ export default class LemonPointEntity extends LemonEntity {
     }
     if (this.drawNeedUpdate) {
       this.getChildMeshes().forEach((child) => child.dispose());
-      const sphereMesh = MeshBuilder.CreateSphere(uuidv4(), { diameter: 0.15 });
-      sphereMesh.isPickable = false;
-      sphereMesh.doNotSyncBoundingInfo = true;
-      this.addChild(sphereMesh);
+      const centerMesh = MeshBuilder.CreateSphere(uuidv4(), { diameter: 0.05 });
+      centerMesh.isPickable = false;
+      centerMesh.doNotSyncBoundingInfo = true;
+      this.addChild(centerMesh);
+
+      const torusMesh = MeshBuilder.CreateTorus(uuidv4(), { diameter: 0.15, thickness: 0.02 });
+      torusMesh.isPickable = false;
+      torusMesh.doNotSyncBoundingInfo = true;
+      torusMesh.rotation.x = -Math.PI / 2;
+      torusMesh.billboardMode = LemonEntity.BILLBOARDMODE_ALL;
+      this.addChild(torusMesh);
+
       this.position.set(this.point.x, this.point.y, this.point.z);
       this.drawNeedUpdate = false;
       return;
