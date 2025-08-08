@@ -1,0 +1,213 @@
+import { Button, Input, Typography } from "@arco-design/web-react";
+import type { RefInputType } from "@arco-design/web-react/es/Input";
+import { IconCheck, IconClose, IconEdit } from "@arco-design/web-react/icon";
+import { makeStyles } from "@griffel/react";
+import React, { useEffect, useRef, useState } from "react";
+
+const ButtonGroup = Button.Group;
+
+interface LemonDialogProps {
+  initialTitle?: string;
+  initialPosition?: { x: number; y: number };
+  enableEdit?: boolean;
+  children?: React.ReactNode;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+}
+
+const useStyles = makeStyles({
+  dialog: {
+    position: "absolute",
+    border: "1px solid #ccc",
+    borderRadius: "8px",
+    boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
+    backgroundColor: "white",
+    userSelect: "none",
+    display: "flex",
+    flexDirection: "column",
+    zIndex: 10000,
+  },
+  resizeRegion: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    width: "5px",
+    height: "100%",
+    cursor: "ew-resize",
+  },
+  header: {
+    padding: "2px",
+    cursor: "move",
+    backgroundColor: "#f1f1f1",
+    borderBottom: "1px solid #ccc",
+    borderTopLeftRadius: "8px",
+    borderTopRightRadius: "8px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  center: {
+    display: "flex",
+    alignItems: "center",
+  },
+  title: {
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
+  content: {
+    padding: "10px",
+    flexGrow: 1,
+  },
+});
+
+export default function LemonDialog({
+  initialTitle = "Sketch",
+  initialPosition = { x: 100, y: 100 },
+  enableEdit = true,
+  children,
+  onConfirm,
+  onCancel,
+}: LemonDialogProps) {
+  const styles = useStyles();
+
+  const [position, setPosition] = useState(initialPosition);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [dialogWidth, setDialogWidth] = useState(300);
+  const [isEditing, setIsEditing] = useState(false);
+  const [title, setTitle] = useState(initialTitle);
+  const [editButtonVisible, setEditButtonVisible] = useState(false);
+
+  const dragOffset = useRef({ x: 0, y: 0 });
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleInputRef = useRef<RefInputType>(null);
+
+  const handleDragMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (dialogRef.current) {
+      setIsDragging(true);
+      const rect = dialogRef.current.getBoundingClientRect();
+      dragOffset.current = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
+    }
+  };
+
+  const handleResizeMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsResizing(true);
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isEditing) {
+        return;
+      }
+      if (isDragging && dialogRef.current) {
+        const rect = dialogRef.current.getBoundingClientRect();
+
+        const newX = e.clientX - dragOffset.current.x;
+        const newY = e.clientY - dragOffset.current.y;
+
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        const clampedX = Math.max(0, Math.min(newX, viewportWidth - rect.width));
+        const clampedY = Math.max(0, Math.min(newY, viewportHeight - rect.height));
+
+        setPosition({
+          x: clampedX,
+          y: clampedY,
+        });
+      }
+      if (isResizing && dialogRef.current) {
+        const rect = dialogRef.current.getBoundingClientRect();
+        const newWidth = e.clientX - rect.left;
+        setDialogWidth(Math.max(newWidth, 300));
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      setIsResizing(false);
+    };
+
+    if (isDragging || isResizing) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging, isResizing]);
+
+  useEffect(() => {
+    if (isEditing) {
+      titleInputRef.current?.focus();
+      setEditButtonVisible(false);
+    }
+  }, [isEditing]);
+
+  return (
+    <div
+      ref={dialogRef}
+      className={styles.dialog}
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        width: `${dialogWidth}px`,
+      }}
+    >
+      <div className={styles.resizeRegion} onMouseDown={handleResizeMouseDown}></div>
+      <div className={styles.header} onMouseDown={handleDragMouseDown}>
+        <div
+          style={{ flex: 1 }}
+          onMouseEnter={() => {
+            if (enableEdit) {
+              setEditButtonVisible(true);
+            }
+          }}
+          onMouseLeave={() => {
+            if (!isEditing) {
+              setEditButtonVisible(false);
+            }
+          }}
+        >
+          {isEditing ? (
+            <Input size="mini" value={title} onChange={(value) => setTitle(value)} ref={titleInputRef} onBlur={() => setIsEditing(false)} />
+          ) : (
+            <div className={styles.center}>
+              <Typography.Text
+                className={styles.title}
+                style={{
+                  maxWidth: dialogWidth - 80,
+                }}
+              >
+                {title}
+              </Typography.Text>
+              {editButtonVisible ? (
+                <Button
+                  type="text"
+                  icon={<IconEdit />}
+                  size="mini"
+                  onClick={() => {
+                    setIsEditing(true);
+                  }}
+                />
+              ) : null}
+            </div>
+          )}
+        </div>
+        <ButtonGroup>
+          <Button type="primary" status="success" icon={<IconCheck />} size="mini" onClick={onConfirm} />
+          <Button type="text" status="danger" icon={<IconClose />} size="mini" onClick={onCancel} />
+        </ButtonGroup>
+      </div>
+      <div className={styles.content}>{children}</div>
+    </div>
+  );
+}
