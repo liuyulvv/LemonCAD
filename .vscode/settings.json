@@ -3,6 +3,7 @@
         "babylonjs",
         "DOUBLESIDE",
         "earcut",
+        "griffel",
         "Pickable",
         "Sider",
         "uuidv"
