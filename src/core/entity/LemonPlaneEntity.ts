@@ -1,7 +1,7 @@
 import { Color3, Mesh, MeshBuilder, StandardMaterial, VertexData } from "@babylonjs/core";
 import { v4 as uuidv4 } from "uuid";
-import LemonPlane from "../geom/LemonPlane";
-import LemonVector from "../geom/LemonVector";
+import LemonPlane from "../../geom/LemonPlane";
+import LemonVector from "../../geom/LemonVector";
 import LemonEntity from "./LemonEntity";
 
 export default class LemonPlaneEntity extends LemonEntity {
