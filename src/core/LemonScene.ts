@@ -1,6 +1,8 @@
 import { AxesViewer, Color4, Scene, Vector3, WebGPUEngine } from "@babylonjs/core";
+import LemonPoint from "../geom/LemonPoint";
 import LemonCamera from "./LemonCamera";
 import LemonPlaneEntity from "./LemonPlaneEntity";
+import LemonPointEntity from "./LemonPointEntity";
 
 export default class LemonScene extends Scene {
   private camera: LemonCamera;
@@ -26,5 +28,9 @@ export default class LemonScene extends Scene {
 
     const rightPlane = LemonPlaneEntity.rightPlane();
     rightPlane.draw(true);
+
+    const point = new LemonPoint(0, 0, 0);
+    const pointEntity = new LemonPointEntity(point);
+    pointEntity.draw(true);
   }
 }
