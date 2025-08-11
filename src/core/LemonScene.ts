@@ -1,8 +1,8 @@
 import { AxesViewer, Color4, Scene, Vector3, WebGPUEngine } from "@babylonjs/core";
 import LemonPoint from "../geom/LemonPoint";
 import LemonCamera from "./LemonCamera";
-import LemonPlaneEntity from "./LemonPlaneEntity";
-import LemonPointEntity from "./LemonPointEntity";
+import LemonPlaneEntity from "./entity/LemonPlaneEntity";
+import LemonPointEntity from "./entity/LemonPointEntity";
 
 export default class LemonScene extends Scene {
   private camera: LemonCamera;

@@ -1,8 +1,8 @@
 import { Color3, MeshBuilder } from "@babylonjs/core";
 import { v4 as uuidv4 } from "uuid";
-import { LemonLine } from "../geom/LemonLine";
-import type LemonPoint from "../geom/LemonPoint";
-import LemonVector from "../geom/LemonVector";
+import { LemonLine } from "../../geom/LemonLine";
+import type LemonPoint from "../../geom/LemonPoint";
+import LemonVector from "../../geom/LemonVector";
 import LemonEntity from "./LemonEntity";
 
 export default class LemonLineEntity extends LemonEntity {
