@@ -9,35 +9,56 @@ import {
   type Nullable,
   type PointerTouch,
 } from "@babylonjs/core";
+import LemonPickManager from "./LemonPickManager";
 
 class LemonArcRotateCameraPointersInput extends BaseCameraPointersInput {
   // @ts-ignore
   public camera: ArcRotateCamera;
-  public static MinimumRadiusForPinch: number = 0.001;
 
   public override getClassName(): string {
     return "LemonArcRotateCameraPointersInput";
   }
 
-  public override buttons = [1, 2]; // left: 0, mid: 1, right: 2
+  public override buttons = [0, 1, 2]; // left: 0, mid: 1, right: 2
 
   private angularSensibilityX = 1000.0;
   private angularSensibilityY = 1000.0;
   private panningSensibility: number = 1000.0;
-  private _isPanClick: boolean = false;
+  private isPickClick: boolean = false;
+  private isRotateClick: boolean = false;
+  private isPanClick: boolean = false;
 
   public override onButtonDown(evt: IPointerEvent): void {
-    this._isPanClick = evt.button == 1;
+    this.isPickClick = evt.button == 0;
+    this.isPanClick = evt.button == 1;
+    this.isRotateClick = evt.button == 2;
+    if (this.isPickClick) {
+      const pickedEntity = LemonPickManager.getInstance().pickEntity();
+      if (pickedEntity) {
+        pickedEntity.isSelected()
+          ? LemonPickManager.getInstance().removePickEntity(pickedEntity)
+          : LemonPickManager.getInstance().addPickEntity(pickedEntity);
+      }
+    }
   }
 
-  public override onButtonUp(_evt: IPointerEvent): void {}
+  public override onButtonUp(evt: IPointerEvent): void {
+    if (evt.button == 0) {
+      this.isPickClick = false;
+    } else if (evt.button == 1) {
+      this.isPanClick = false;
+    } else if (evt.button == 2) {
+      this.isRotateClick = false;
+    }
+  }
 
   public override onLostFocus(): void {
-    this._isPanClick = false;
+    this.isPanClick = false;
+    this.isRotateClick = false;
   }
 
   public override onTouch(point: Nullable<PointerTouch>, offsetX: number, offsetY: number): void {
-    if (this.panningSensibility !== 0 && ((this._ctrlKey && this.camera._useCtrlForPanning) || this._isPanClick)) {
+    if (this.panningSensibility !== 0 && ((this._ctrlKey && this.camera._useCtrlForPanning) || this.isPanClick)) {
       if (!point || !this.camera) {
         return;
       }
@@ -55,7 +76,7 @@ class LemonArcRotateCameraPointersInput extends BaseCameraPointersInput {
         this.camera.position.addInPlace(offset);
         this.camera.target.addInPlace(offset);
       }
-    } else {
+    } else if (this.isRotateClick) {
       this.camera.inertialAlphaOffset -= offsetX / this.angularSensibilityX;
       this.camera.inertialBetaOffset -= offsetY / this.angularSensibilityY;
     }

@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 
 export default class LemonEntity extends Mesh {
   protected scene: Scene = this._scene;
+  protected selectedStatus: boolean = false;
+  protected hoveredStatus: boolean = false;
 
   public constructor() {
     super(uuidv4());
@@ -31,5 +33,21 @@ export default class LemonEntity extends Mesh {
 
   public getAllChildrenEntity(): Array<LemonEntity> {
     return this.getChildMeshes().map((child) => child as LemonEntity);
+  }
+
+  public isSelected(): boolean {
+    return this.selectedStatus;
+  }
+
+  public isHovered(): boolean {
+    return this.hoveredStatus;
+  }
+
+  public onSelected(selected: boolean): void {
+    this.selectedStatus = selected;
+  }
+
+  public onHovered(hovered: boolean): void {
+    this.hoveredStatus = hovered;
   }
 }

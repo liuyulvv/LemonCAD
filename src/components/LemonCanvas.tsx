@@ -1,10 +1,14 @@
 import { Logger } from "@babylonjs/core";
 import { useEffect, useRef } from "react";
 import LemonEngine from "../core/LemonEngine";
+import LemonPickManager from "../core/LemonPickManager";
 import LemonScene from "../core/LemonScene";
+import useLemonStageStore from "../store/LemonStageStore";
 
 export default function LemonCanvas() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const mainCanvas = useRef<HTMLCanvasElement>(null);
+  const { setEngine, setScene, setPickManager } = useLemonStageStore();
 
   useEffect(() => {
     Logger.LogLevels = Logger.ErrorLogLevel;
@@ -16,21 +20,31 @@ export default function LemonCanvas() {
 
     let engine: LemonEngine;
     let scene: LemonScene;
+    let resizeObserver: ResizeObserver | undefined;
 
     const initialize = async () => {
       engine = new LemonEngine(canvas);
       await engine.initAsync();
       scene = new LemonScene(engine, canvas);
+
+      setEngine(engine);
+      setScene(scene);
+      setPickManager(LemonPickManager.getInstance(scene));
+
       engine.runRenderLoop(() => {
         scene.render();
       });
 
-      const resizeCallback = () => {
-        engine.resize();
-      };
-
-      if (window) {
-        window.addEventListener("resize", resizeCallback);
+      if (containerRef.current) {
+        let resizeTimer: number | null = null;
+        // CSS animation
+        resizeObserver = new ResizeObserver(() => {
+          if (resizeTimer) clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(() => {
+            engine.resize();
+          }, 16);
+        });
+        resizeObserver.observe(containerRef.current);
       }
 
       engine.resize();
@@ -38,9 +52,8 @@ export default function LemonCanvas() {
       return () => {
         scene.dispose();
         engine.dispose();
-
-        if (window) {
-          window.removeEventListener("resize", resizeCallback);
+        if (resizeObserver && containerRef.current) {
+          resizeObserver.unobserve(containerRef.current);
         }
       };
     };
@@ -63,6 +76,7 @@ export default function LemonCanvas() {
 
   return (
     <div
+      ref={containerRef}
       style={{
         position: "relative",
         flexGrow: "1",
