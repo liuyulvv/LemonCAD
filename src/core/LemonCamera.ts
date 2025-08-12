@@ -9,11 +9,9 @@ import {
   type Nullable,
   type PointerTouch,
 } from "@babylonjs/core";
-import LemonPickManager from "./LemonPickManager";
 
 class LemonArcRotateCameraPointersInput extends BaseCameraPointersInput {
-  // @ts-ignore
-  public camera: ArcRotateCamera;
+  public camera!: ArcRotateCamera;
 
   public override getClassName(): string {
     return "LemonArcRotateCameraPointersInput";
@@ -24,28 +22,19 @@ class LemonArcRotateCameraPointersInput extends BaseCameraPointersInput {
   private angularSensibilityX = 1000.0;
   private angularSensibilityY = 1000.0;
   private panningSensibility: number = 1000.0;
-  private isPickClick: boolean = false;
   private isRotateClick: boolean = false;
   private isPanClick: boolean = false;
 
   public override onButtonDown(evt: IPointerEvent): void {
-    this.isPickClick = evt.button == 0;
-    this.isPanClick = evt.button == 1;
-    this.isRotateClick = evt.button == 2;
-    if (this.isPickClick) {
-      const pickedEntity = LemonPickManager.getInstance().pickEntity();
-      if (pickedEntity) {
-        pickedEntity.isSelected()
-          ? LemonPickManager.getInstance().removePickEntity(pickedEntity)
-          : LemonPickManager.getInstance().addPickEntity(pickedEntity);
-      }
+    if (evt.button == 1) {
+      this.isPanClick = true;
+    } else if (evt.button == 2) {
+      this.isRotateClick = true;
     }
   }
 
   public override onButtonUp(evt: IPointerEvent): void {
-    if (evt.button == 0) {
-      this.isPickClick = false;
-    } else if (evt.button == 1) {
+    if (evt.button == 1) {
       this.isPanClick = false;
     } else if (evt.button == 2) {
       this.isRotateClick = false;
@@ -59,7 +48,7 @@ class LemonArcRotateCameraPointersInput extends BaseCameraPointersInput {
 
   public override onTouch(point: Nullable<PointerTouch>, offsetX: number, offsetY: number): void {
     if (this.panningSensibility !== 0 && ((this._ctrlKey && this.camera._useCtrlForPanning) || this.isPanClick)) {
-      if (!point || !this.camera) {
+      if (!point) {
         return;
       }
       const cameraDirection = this.camera.target.subtract(this.camera.position).normalize();
@@ -84,17 +73,41 @@ class LemonArcRotateCameraPointersInput extends BaseCameraPointersInput {
 }
 
 export default class LemonCamera extends ArcRotateCamera {
+  private oldRadius: number = 10;
+
   public constructor(scene: Scene) {
-    super("camera", Math.PI / 2, 0, 10, Vector3.Zero(), scene);
+    super("LemonCamera3D", Math.PI / 2, 0, 10, Vector3.Zero(), scene);
     this.lowerBetaLimit = null;
     this.upperBetaLimit = null;
     this.upVector = new Vector3(0, 0, 1);
+
+    this.orthoLeft = -30;
+    this.orthoRight = 30;
+    this.mode = LemonCamera.ORTHOGRAPHIC_CAMERA;
 
     this.inputs.clear();
     this.inputs.addMouseWheel();
     this.inputs.add(new LemonArcRotateCameraPointersInput());
     this._panningMouseButton = 1;
 
-    this.setPosition(new Vector3(-10, -10, 10));
+    this.setPosition(new Vector3(-15, -5, 10));
+    this.oldRadius = this.radius;
+
+    this.lowerRadiusLimit = 0.1;
+    this.upperRadiusLimit = 100;
+
+    this._scene.onBeforeRenderObservable.add(() => {
+      const engine = this._scene.getEngine();
+      const canvas = engine.getRenderingCanvas();
+      if (canvas) {
+        const radius_change_ratio = this.radius / this.oldRadius;
+        this.orthoLeft! *= radius_change_ratio;
+        this.orthoRight! *= radius_change_ratio;
+        this.oldRadius = this.radius;
+        const ratio = canvas.height / canvas.width;
+        this.orthoTop = this.orthoRight! * ratio;
+        this.orthoBottom = this.orthoLeft! * ratio;
+      }
+    });
   }
 }

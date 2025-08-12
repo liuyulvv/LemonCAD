@@ -1,14 +1,20 @@
 import { AxesViewer, Color4, Scene, Vector3, WebGPUEngine } from "@babylonjs/core";
 import LemonPoint from "../geom/LemonPoint";
+import useLemonStageStore from "../store/LemonStageStore";
 import LemonCamera from "./LemonCamera";
 import LemonPlaneEntity from "./entity/LemonPlaneEntity";
 import LemonPointEntity from "./entity/LemonPointEntity";
+import LemonInteractorManager from "./interactor/LemonInteractorManager";
 
 export default class LemonScene extends Scene {
   private camera: LemonCamera;
+  private interactorManager: LemonInteractorManager;
 
   public constructor(engine: WebGPUEngine, canvas: HTMLCanvasElement) {
     super(engine, undefined);
+    this.interactorManager = new LemonInteractorManager(this);
+    useLemonStageStore.getState().setInteractorManager(this.interactorManager);
+
     this.camera = new LemonCamera(this);
 
     this.useRightHandedSystem = true;
@@ -32,5 +38,10 @@ export default class LemonScene extends Scene {
     const point = new LemonPoint(0, 0, 0);
     const pointEntity = new LemonPointEntity(point);
     pointEntity.draw(true);
+  }
+
+  public override dispose(): void {
+    this.interactorManager.dispose();
+    super.dispose();
   }
 }

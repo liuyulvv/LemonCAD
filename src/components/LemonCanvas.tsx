@@ -1,14 +1,13 @@
 import { Logger } from "@babylonjs/core";
 import { useEffect, useRef } from "react";
 import LemonEngine from "../core/LemonEngine";
-import LemonPickManager from "../core/LemonPickManager";
 import LemonScene from "../core/LemonScene";
 import useLemonStageStore from "../store/LemonStageStore";
 
 export default function LemonCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mainCanvas = useRef<HTMLCanvasElement>(null);
-  const { setEngine, setScene, setPickManager } = useLemonStageStore();
+  const { setEngine, setScene } = useLemonStageStore();
 
   useEffect(() => {
     Logger.LogLevels = Logger.ErrorLogLevel;
@@ -29,7 +28,6 @@ export default function LemonCanvas() {
 
       setEngine(engine);
       setScene(scene);
-      setPickManager(LemonPickManager.getInstance(scene));
 
       engine.runRenderLoop(() => {
         scene.render();

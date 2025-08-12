@@ -1,15 +1,15 @@
 import { create } from "zustand";
 import type LemonEngine from "../core/LemonEngine";
-import type LemonPickManager from "../core/LemonPickManager";
 import type LemonScene from "../core/LemonScene";
+import type LemonInteractorManager from "../core/interactor/LemonInteractorManager";
 
 type StageStore = {
   engine: LemonEngine;
   setEngine: (engine: LemonEngine) => void;
   scene: LemonScene;
   setScene: (scene: LemonScene) => void;
-  pickManager: LemonPickManager;
-  setPickManager: (manager: LemonPickManager) => void;
+  interactorManager: LemonInteractorManager;
+  setInteractorManager: (manager: LemonInteractorManager) => void;
 };
 
 const useLemonStageStore = create<StageStore>()((set) => ({
@@ -17,8 +17,8 @@ const useLemonStageStore = create<StageStore>()((set) => ({
   setEngine: (engine) => set({ engine }),
   scene: {} as LemonScene,
   setScene: (scene) => set({ scene }),
-  pickManager: {} as LemonPickManager,
-  setPickManager: (manager) => set({ pickManager: manager }),
+  interactorManager: {} as LemonInteractorManager,
+  setInteractorManager: (manager) => set({ interactorManager: manager }),
 }));
 
 export default useLemonStageStore;
