@@ -21,6 +21,7 @@ export default class LemonEntity extends Mesh {
 
   public show(flag: boolean): void {
     this.isVisible = flag;
+    this.setEnabled(flag);
   }
 
   public getRootEntity(): LemonEntity {

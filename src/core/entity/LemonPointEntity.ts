@@ -1,4 +1,4 @@
-import { MeshBuilder, Observer, Scene } from "@babylonjs/core";
+import { Mesh, MeshBuilder, Observer, Scene } from "@babylonjs/core";
 import { v4 as uuidv4 } from "uuid";
 import type LemonPoint from "../../geom/LemonPoint";
 import LemonEntity from "./LemonEntity";
@@ -7,6 +7,8 @@ export default class LemonPointEntity extends LemonEntity {
   private point: LemonPoint | null = null;
   private drawNeedUpdate = true;
   private onBeforeRenderObserver: Observer<Scene> | null = null;
+  private centerMesh: Mesh | null = null;
+  private torusMesh: Mesh | null = null;
 
   public constructor(point?: LemonPoint, ignoreCameraZoom: boolean = true) {
     super();
@@ -31,21 +33,50 @@ export default class LemonPointEntity extends LemonEntity {
     }
     if (this.drawNeedUpdate) {
       this.getChildMeshes().forEach((child) => child.dispose());
-      const centerMesh = MeshBuilder.CreateSphere(uuidv4(), { diameter: 0.05 });
-      centerMesh.isPickable = false;
-      centerMesh.doNotSyncBoundingInfo = true;
-      this.addChild(centerMesh);
+      this.centerMesh = MeshBuilder.CreateSphere(uuidv4(), { diameter: 0.05 });
+      this.centerMesh.isPickable = false;
+      this.centerMesh.doNotSyncBoundingInfo = true;
+      this.centerMesh.material = this.defaultMaterial;
+      this.addChild(this.centerMesh);
 
-      const torusMesh = MeshBuilder.CreateTorus(uuidv4(), { diameter: 0.15, thickness: 0.02 });
-      torusMesh.isPickable = false;
-      torusMesh.doNotSyncBoundingInfo = true;
-      torusMesh.rotation.x = -Math.PI / 2;
-      torusMesh.billboardMode = LemonEntity.BILLBOARDMODE_ALL;
-      this.addChild(torusMesh);
+      this.torusMesh = MeshBuilder.CreateTorus(uuidv4(), { diameter: 0.15, thickness: 0.02 });
+      this.torusMesh.isPickable = false;
+      this.torusMesh.doNotSyncBoundingInfo = true;
+      this.torusMesh.rotation.x = -Math.PI / 2;
+      this.torusMesh.billboardMode = LemonEntity.BILLBOARDMODE_ALL;
+      this.torusMesh.material = this.defaultMaterial;
+      this.addChild(this.torusMesh);
 
       this.position.set(this.point.x, this.point.y, this.point.z);
       this.drawNeedUpdate = false;
       return;
+    }
+  }
+
+  public onSelected(selected: boolean): void {
+    super.onSelected(selected);
+    if (this.centerMesh && this.torusMesh) {
+      if (selected) {
+        this.centerMesh.material = this.selectedMaterial;
+        this.torusMesh.material = this.selectedMaterial;
+      } else {
+        this.centerMesh.material = this.defaultMaterial;
+        this.torusMesh.material = this.defaultMaterial;
+      }
+    }
+  }
+
+  public onHovered(hovered: boolean): void {
+    super.onHovered(hovered);
+    if (this.selectedStatus || !this.centerMesh || !this.torusMesh) {
+      return;
+    }
+    if (hovered) {
+      this.centerMesh.material = this.hoveredMaterial;
+      this.torusMesh.material = this.hoveredMaterial;
+    } else {
+      this.centerMesh.material = this.defaultMaterial;
+      this.torusMesh.material = this.defaultMaterial;
     }
   }
 
