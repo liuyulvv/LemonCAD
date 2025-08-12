@@ -1,7 +1,6 @@
 import { MeshBuilder, Observer, Scene } from "@babylonjs/core";
 import { v4 as uuidv4 } from "uuid";
 import type LemonPoint from "../../geom/LemonPoint";
-import LemonVector from "../../geom/LemonVector";
 import LemonEntity from "./LemonEntity";
 
 export default class LemonPointEntity extends LemonEntity {
@@ -16,8 +15,7 @@ export default class LemonPointEntity extends LemonEntity {
       ? this.scene.onBeforeRenderObservable.add(() => {
           const camera = this.scene.activeCamera;
           if (camera && this.position) {
-            const distance = LemonVector.Distance(this.position, camera.position);
-            const scale = distance / Math.sqrt(300);
+            const scale = camera.orthoLeft! / 30;
             this.scaling.setAll(scale);
           }
         })
