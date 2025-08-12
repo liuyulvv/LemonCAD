@@ -12,7 +12,7 @@ export interface LemonPickInfo {
 export default class LemonInteractorManager {
   private scene: LemonScene;
   private interactorFilters: LemonInteractorFilter[] = [];
-  private interactorInfo!: LemonInteractorInfo;
+  private interactorInfo: LemonInteractorInfo;
   private pickedEntities: LemonEntity[] = [];
   private hoveredEntity: LemonEntity | null = null;
 
@@ -23,6 +23,13 @@ export default class LemonInteractorManager {
 
   public constructor(scene: LemonScene) {
     this.scene = scene;
+    this.interactorInfo = {
+      screenX: 0,
+      screenY: 0,
+      worldX: 0,
+      worldY: 0,
+      worldZ: 0,
+    };
     this.observerInfo = this.scene.onPointerObservable.add((pointerInfo) => {
       if (pointerInfo.type == PointerEventTypes.POINTERDOWN) {
         if (pointerInfo.event.button == 0) {
