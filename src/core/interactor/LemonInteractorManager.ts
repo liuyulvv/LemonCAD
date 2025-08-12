@@ -108,12 +108,16 @@ export default class LemonInteractorManager {
   }
 
   public onMouseMove(): void {
-    if (this.leftPressed) {
-      this.leftPressMoved = true;
-    } else {
-      this.leftPressMoved = false;
-    }
+    const screenX = this.interactorInfo.screenX;
+    const screenY = this.interactorInfo.screenY;
     this.fillInteractorInfo();
+    if (Math.abs(screenX - this.interactorInfo.screenX) > 2 && Math.abs(screenY - this.interactorInfo.screenY) < 2) {
+      if (this.leftPressed) {
+        this.leftPressMoved = true;
+      } else {
+        this.leftPressMoved = false;
+      }
+    }
     for (const filter of this.interactorFilters) {
       if (filter.onMouseMove(this.interactorInfo)) {
         return;
