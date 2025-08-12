@@ -1,12 +1,15 @@
-import { Button, Tree } from "@arco-design/web-react";
-import { IconMenuFold, IconMenuUnfold } from "@arco-design/web-react/icon";
+import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
+import { Button, Tree } from "antd";
 import { useEffect, useRef, useState } from "react";
+import useLemonStageStore from "../store/LemonStageStore";
+import LemonGeometryNode from "./LemonGeometryNode";
 
-const TreeNode = Tree.Node;
+const TreeNode = Tree.TreeNode;
 
 function LemonLeftToolNavigation() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [recordedWidth, setRecordedWidth] = useState("192px");
+  const { interactorManager, entityManager } = useLemonStageStore();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -35,12 +38,29 @@ function LemonLeftToolNavigation() {
           overflow: "hidden",
         }}
       >
-        <Tree blockNode actionOnClick="expand">
-          <TreeNode title="Default geometry" key="default-geometry">
-            <TreeNode title="Origin" key="origin" />
-            <TreeNode title="Front plane" key="front-plane" />
-            <TreeNode title="Top Plane" key="top-plane" />
-            <TreeNode title="Right plane" key="right-plane" />
+        <Tree
+          multiple
+          blockNode
+          showLine
+          defaultExpandedKeys={["default-geometry"]}
+          onSelect={(_value, info) => {
+            if (info.node.key) {
+              const entity = entityManager.getEntity(info.node.key as string);
+              if (entity) {
+                if (info.selected) {
+                  interactorManager.insertPickedEntity(entity);
+                } else {
+                  interactorManager.removePickedEntity(entity);
+                }
+              }
+            }
+          }}
+        >
+          <TreeNode title="Default geometry" key="default-geometry" selectable={false}>
+            <TreeNode title={<LemonGeometryNode name="Origin" id="origin-point" />} key="origin-point" />
+            <TreeNode title={<LemonGeometryNode name="Front plane" id="front-plane" />} key="front-plane" />
+            <TreeNode title={<LemonGeometryNode name="Top plane" id="top-plane" />} key="top-plane" />
+            <TreeNode title={<LemonGeometryNode name="Right plane" id="right-plane" />} key="right-plane" />
           </TreeNode>
         </Tree>
       </div>
@@ -48,7 +68,7 @@ function LemonLeftToolNavigation() {
         style={{
           alignSelf: "center",
         }}
-        icon={isExpanded ? <IconMenuFold /> : <IconMenuUnfold />}
+        icon={isExpanded ? <MenuFoldOutlined /> : <MenuUnfoldOutlined />}
         type="text"
         onClick={toggleWidth}
       />

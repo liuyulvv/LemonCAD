@@ -1,47 +1,49 @@
-import { Layout } from "@arco-design/web-react";
+import { makeStyles } from "@griffel/react";
 import LemonCanvas from "./components/LemonCanvas";
 import LemonLeftToolNavigation from "./components/LemonLeftToolNavigation";
 import LemonNavigation from "./components/LemonNavigation";
-import useLeftToolNavigationStore from "./store/LemonLeftToolNavigationStore";
 
-const Sider = Layout.Sider;
-const Header = Layout.Header;
-const Footer = Layout.Footer;
-const Content = Layout.Content;
+const useStyles = makeStyles({
+  container: {
+    display: "flex",
+    height: "100vh",
+    userSelect: "none",
+  },
+  aside: {},
+  content: {
+    display: "flex",
+    flex: 1,
+    flexDirection: "column",
+  },
+  main: {
+    display: "flex",
+    flexDirection: "row",
+    width: "100%",
+    height: "100%",
+  },
+  canvas: {
+    display: "flex",
+    flex: 1,
+    overflow: "hidden",
+  },
+  footer: {},
+});
 
 export default function App() {
-  const { collapsed, setCollapsed } = useLeftToolNavigationStore();
+  const styles = useStyles();
 
   return (
-    <Layout
-      style={{
-        height: "100vh",
-        userSelect: "none",
-      }}
-    >
-      <Sider onCollapse={setCollapsed} collapsed={collapsed}></Sider>
-      <Layout>
-        <Header>
-          <LemonNavigation />
-        </Header>
-        <Layout
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            height: "100%",
-          }}
-        >
+    <div className={styles.container}>
+      <div className={styles.aside}></div>
+      <div className={styles.content}>
+        <LemonNavigation />
+        <div className={styles.main}>
           <LemonLeftToolNavigation />
-          <Content
-            style={{
-              overflow: "hidden",
-            }}
-          >
+          <div className={styles.canvas}>
             <LemonCanvas />
-          </Content>
-        </Layout>
-        <Footer></Footer>
-      </Layout>
-    </Layout>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

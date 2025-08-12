@@ -1,5 +1,5 @@
-import { Button, Divider } from "@arco-design/web-react";
-import { IconPen, IconRedo, IconUndo } from "@arco-design/web-react/icon";
+import { EditOutlined, RedoOutlined, UndoOutlined } from "@ant-design/icons";
+import { Button, Divider } from "antd";
 
 function LemonNavigation() {
   return (
@@ -10,10 +10,10 @@ function LemonNavigation() {
         alignItems: "center",
       }}
     >
-      <Button type="text" icon={<IconUndo />} />
-      <Button type="text" icon={<IconRedo />} />
+      <Button type="text" icon={<UndoOutlined />} />
+      <Button type="text" icon={<RedoOutlined />} />
       <Divider type="vertical" />
-      <Button type="text" onClick={() => {}} icon={<IconPen />}>
+      <Button type="text" onClick={() => {}} icon={<EditOutlined />}>
         Sketch
       </Button>
       <Button type="text" onClick={() => {}}>

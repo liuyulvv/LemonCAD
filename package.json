@@ -10,9 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@arco-design/web-react": "^2.66.2",
+    "@ant-design/icons": "~5.6.1",
     "@babylonjs/core": "^8.18.0",
     "@babylonjs/materials": "^8.18.0",
+    "antd": "^5.27.0",
     "earcut": "^3.0.2",
     "normalize.css": "^8.0.1",
     "react": "^19.1.0",

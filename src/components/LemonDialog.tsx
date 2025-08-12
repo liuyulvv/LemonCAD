@@ -1,7 +1,6 @@
-import { Button, Input, Typography } from "@arco-design/web-react";
-import type { RefInputType } from "@arco-design/web-react/es/Input";
-import { IconCheck, IconClose, IconEdit } from "@arco-design/web-react/icon";
+import { CheckOutlined, CloseOutlined, EditOutlined } from "@ant-design/icons";
 import { makeStyles } from "@griffel/react";
+import { Button, Input, Typography, type InputRef } from "antd";
 import React, { useEffect, useRef, useState } from "react";
 
 const ButtonGroup = Button.Group;
@@ -81,7 +80,7 @@ export default function LemonDialog({
 
   const dragOffset = useRef({ x: 0, y: 0 });
   const dialogRef = useRef<HTMLDivElement>(null);
-  const titleInputRef = useRef<RefInputType>(null);
+  const titleInputRef = useRef<InputRef>(null);
 
   const handleDragMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (dialogRef.current) {
@@ -178,7 +177,7 @@ export default function LemonDialog({
           }}
         >
           {isEditing ? (
-            <Input size="mini" value={title} onChange={(value) => setTitle(value)} ref={titleInputRef} onBlur={() => setIsEditing(false)} />
+            <Input size="small" value={title} onChange={(e) => setTitle(e.target.value)} ref={titleInputRef} onBlur={() => setIsEditing(false)} />
           ) : (
             <div className={styles.center}>
               <Typography.Text
@@ -192,8 +191,8 @@ export default function LemonDialog({
               {editButtonVisible ? (
                 <Button
                   type="text"
-                  icon={<IconEdit />}
-                  size="mini"
+                  icon={<EditOutlined />}
+                  size="small"
                   onClick={() => {
                     setIsEditing(true);
                   }}
@@ -203,8 +202,8 @@ export default function LemonDialog({
           )}
         </div>
         <ButtonGroup>
-          <Button type="primary" status="success" icon={<IconCheck />} size="mini" onClick={onConfirm} />
-          <Button type="text" status="danger" icon={<IconClose />} size="mini" onClick={onCancel} />
+          <Button type="primary" icon={<CheckOutlined />} size="small" onClick={onConfirm} variant="solid" />
+          <Button type="text" icon={<CloseOutlined />} size="small" onClick={onCancel} color="danger" variant="solid" />
         </ButtonGroup>
       </div>
       <div className={styles.content}>{children}</div>
