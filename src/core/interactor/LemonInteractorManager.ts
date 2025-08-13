@@ -232,6 +232,16 @@ export default class LemonInteractorManager {
     return info;
   }
 
+  public setHoveredEntity(entity: LemonEntity | null): void {
+    if (this.hoveredEntity) {
+      this.hoveredEntity.onHovered(false);
+    }
+    this.hoveredEntity = entity;
+    if (this.hoveredEntity) {
+      this.hoveredEntity.onHovered(true);
+    }
+  }
+
   public dispose(): void {
     this.scene.onPointerObservable.remove(this.observerInfo);
     this.interactorFilters = [];

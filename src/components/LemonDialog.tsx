@@ -1,9 +1,8 @@
 import { CheckOutlined, CloseOutlined, EditOutlined } from "@ant-design/icons";
 import { makeStyles } from "@griffel/react";
-import { Button, Input, Typography, type InputRef } from "antd";
+import { Button, Input, Space, Typography, type InputRef } from "antd";
 import React, { useEffect, useRef, useState } from "react";
-
-const ButtonGroup = Button.Group;
+import useLemonDialogStore from "../store/LemonDialogStore";
 
 interface LemonDialogProps {
   initialTitle?: string;
@@ -24,7 +23,6 @@ const useStyles = makeStyles({
     userSelect: "none",
     display: "flex",
     flexDirection: "column",
-    zIndex: 10000,
   },
   resizeRegion: {
     position: "absolute",
@@ -62,7 +60,7 @@ const useStyles = makeStyles({
 
 export default function LemonDialog({
   initialTitle = "Sketch",
-  initialPosition = { x: 100, y: 100 },
+  initialPosition = { x: 225, y: 32 },
   enableEdit = true,
   children,
   onConfirm,
@@ -77,6 +75,8 @@ export default function LemonDialog({
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(initialTitle);
   const [editButtonVisible, setEditButtonVisible] = useState(false);
+  const { maxZIndex, setMaxZIndex } = useLemonDialogStore();
+  const [zIndex, setZIndex] = useState(maxZIndex);
 
   const dragOffset = useRef({ x: 0, y: 0 });
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -159,6 +159,11 @@ export default function LemonDialog({
         left: `${position.x}px`,
         top: `${position.y}px`,
         width: `${dialogWidth}px`,
+        zIndex: zIndex,
+      }}
+      onMouseDown={() => {
+        setZIndex(maxZIndex + 1);
+        setMaxZIndex(maxZIndex + 1);
       }}
     >
       <div className={styles.resizeRegion} onMouseDown={handleResizeMouseDown}></div>
@@ -201,10 +206,10 @@ export default function LemonDialog({
             </div>
           )}
         </div>
-        <ButtonGroup>
+        <Space.Compact>
           <Button type="primary" icon={<CheckOutlined />} size="small" onClick={onConfirm} variant="solid" />
           <Button type="text" icon={<CloseOutlined />} size="small" onClick={onCancel} color="danger" variant="solid" />
-        </ButtonGroup>
+        </Space.Compact>
       </div>
       <div className={styles.content}>{children}</div>
     </div>

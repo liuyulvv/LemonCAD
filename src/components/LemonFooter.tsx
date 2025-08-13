@@ -18,7 +18,7 @@ export default function LemonFooter() {
 
   return (
     <div className={styles.footer}>
-      <Text>{tip}</Text>
+      <Text type="warning">{tip}</Text>
     </div>
   );
 }

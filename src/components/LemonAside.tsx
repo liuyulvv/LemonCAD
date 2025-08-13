@@ -7,7 +7,7 @@ import LemonGeometryNode from "./LemonGeometryNode";
 
 function LemonAside() {
   const { interactorManager, entityManager } = useLemonStageStore();
-  const { collapsed, setCollapsed, geometryData } = useLemonAsideStore();
+  const { collapsed, setCollapsed, geometryData, setGeometryNodeIconVisible } = useLemonAsideStore();
   const [treeNode, setTreeNode] = useState<LemonGeometryData[]>([]);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -15,6 +15,7 @@ function LemonAside() {
   const generateTreeNodes = (data: LemonGeometryData[]): LemonGeometryData[] => {
     return data.map((item) => {
       if (item.selectable == undefined || item.selectable) {
+        setGeometryNodeIconVisible(item.key, false);
         return {
           title: <LemonGeometryNode name={item.title as string} id={item.key} />,
           name: item.title,
@@ -93,6 +94,13 @@ function LemonAside() {
               if (entity) {
                 interactorManager.setHoveredEntity(entity);
               }
+              setGeometryNodeIconVisible(key, true);
+            }
+          }}
+          onMouseLeave={(info) => {
+            const key = info.node.key as string;
+            if (key != "default-geometry") {
+              setGeometryNodeIconVisible(key, false);
             }
           }}
           treeData={treeNode}

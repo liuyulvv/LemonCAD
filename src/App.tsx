@@ -6,6 +6,7 @@ import LemonCanvas from "./components/LemonCanvas";
 import LemonFooter from "./components/LemonFooter";
 import LemonNavigation from "./components/LemonNavigation";
 import useLemonAsideStore from "./store/LemonAsideStore";
+import useLemonDialogStore from "./store/LemonDialogStore";
 
 const useStyles = makeStyles({
   container: {
@@ -34,8 +35,9 @@ const useStyles = makeStyles({
 
 export default function App() {
   const styles = useStyles();
-  const { collapsed } = useLemonAsideStore();
   const [asideSize, setAsideSize] = useState(225);
+  const { collapsed } = useLemonAsideStore();
+  const { dialogs } = useLemonDialogStore();
 
   return (
     <div className={styles.container}>
@@ -58,6 +60,9 @@ export default function App() {
         </div>
         <LemonFooter />
       </div>
+      {Array.from(dialogs.entries()).map(([id, dialog]) => (
+        <div key={id}>{dialog}</div>
+      ))}
     </div>
   );
 }

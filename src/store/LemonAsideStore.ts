@@ -13,6 +13,8 @@ interface AsideStore {
   setCollapsed: (collapsed: boolean) => void;
   geometryData: LemonGeometryData[];
   setGeometryData: (data: LemonGeometryData[]) => void;
+  geometryNodeIconVisibleMap: Record<string, boolean>;
+  setGeometryNodeIconVisible: (key: string, visible: boolean) => void;
 }
 
 const useLemonAsideStore = create<AsideStore>()((set) => ({
@@ -33,6 +35,11 @@ const useLemonAsideStore = create<AsideStore>()((set) => ({
     },
   ],
   setGeometryData: (data) => set({ geometryData: data }),
+  geometryNodeIconVisibleMap: {},
+  setGeometryNodeIconVisible: (key, visible) =>
+    set((state) => ({
+      geometryNodeIconVisibleMap: { ...state.geometryNodeIconVisibleMap, [key]: visible },
+    })),
 }));
 
 export default useLemonAsideStore;
