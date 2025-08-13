@@ -1,7 +1,11 @@
 import { makeStyles } from "@griffel/react";
+import { Splitter } from "antd";
+import { useState } from "react";
+import LemonAside from "./components/LemonAside";
 import LemonCanvas from "./components/LemonCanvas";
-import LemonLeftToolNavigation from "./components/LemonLeftToolNavigation";
+import LemonFooter from "./components/LemonFooter";
 import LemonNavigation from "./components/LemonNavigation";
+import useLemonAsideStore from "./store/LemonAsideStore";
 
 const useStyles = makeStyles({
   container: {
@@ -26,11 +30,12 @@ const useStyles = makeStyles({
     flex: 1,
     overflow: "hidden",
   },
-  footer: {},
 });
 
 export default function App() {
   const styles = useStyles();
+  const { collapsed } = useLemonAsideStore();
+  const [asideSize, setAsideSize] = useState(225);
 
   return (
     <div className={styles.container}>
@@ -38,11 +43,20 @@ export default function App() {
       <div className={styles.content}>
         <LemonNavigation />
         <div className={styles.main}>
-          <LemonLeftToolNavigation />
-          <div className={styles.canvas}>
-            <LemonCanvas />
-          </div>
+          <Splitter
+            onResize={(sizes) => {
+              setAsideSize(sizes[0]);
+            }}
+          >
+            <Splitter.Panel size={collapsed ? 32 : asideSize} min={collapsed ? 32 : 225} resizable={collapsed ? false : true}>
+              <LemonAside />
+            </Splitter.Panel>
+            <Splitter.Panel>
+              <LemonCanvas />
+            </Splitter.Panel>
+          </Splitter>
         </div>
+        <LemonFooter />
       </div>
     </div>
   );
