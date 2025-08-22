@@ -1,9 +1,13 @@
 import {
-  ArcRotateCamera,
   BaseCameraPointersInput,
   Matrix,
+  Observer,
   Plane,
+  PointerEventTypes,
+  PointerInfo,
   Scene,
+  TransformNode,
+  UniversalCamera,
   Vector3,
   type IPointerEvent,
   type Nullable,
@@ -11,7 +15,7 @@ import {
 } from "@babylonjs/core";
 
 class LemonArcRotateCameraPointersInput extends BaseCameraPointersInput {
-  public camera!: ArcRotateCamera;
+  public camera!: LemonCamera;
 
   public override getClassName(): string {
     return "LemonArcRotateCameraPointersInput";
@@ -19,8 +23,6 @@ class LemonArcRotateCameraPointersInput extends BaseCameraPointersInput {
 
   public override buttons = [0, 1, 2]; // left: 0, mid: 1, right: 2
 
-  private angularSensibilityX = 1000.0;
-  private angularSensibilityY = 1000.0;
   private panningSensibility: number = 1000.0;
   private isRotateClick: boolean = false;
   private isPanClick: boolean = false;
@@ -47,11 +49,11 @@ class LemonArcRotateCameraPointersInput extends BaseCameraPointersInput {
   }
 
   public override onTouch(point: Nullable<PointerTouch>, offsetX: number, offsetY: number): void {
-    if (this.panningSensibility !== 0 && ((this._ctrlKey && this.camera._useCtrlForPanning) || this.isPanClick)) {
-      if (!point) {
-        return;
-      }
-      const cameraDirection = this.camera.target.subtract(this.camera.position).normalize();
+    if (!point) {
+      return;
+    }
+    if (this.panningSensibility !== 0 && (this._ctrlKey || this.isPanClick)) {
+      const cameraDirection = this.camera.target.subtract(this.camera.targetNode.position).normalize();
       const panningPlane = Plane.FromPositionAndNormal(this.camera.target, cameraDirection);
       const scene = this.camera.getScene();
       const lastRay = scene.createPickingRay(point.x - offsetX, point.y - offsetY, Matrix.Identity(), this.camera, false);
@@ -62,52 +64,94 @@ class LemonArcRotateCameraPointersInput extends BaseCameraPointersInput {
         const lastIntersection = lastRay.origin.add(lastRay.direction.scale(lastIntersectionDistance));
         const currentIntersection = currentRay.origin.add(currentRay.direction.scale(currentIntersectionDistance));
         const offset = lastIntersection.subtract(currentIntersection);
-        this.camera.position.addInPlace(offset);
         this.camera.target.addInPlace(offset);
+        this.camera.targetNode.position.addInPlace(offset);
       }
     } else if (this.isRotateClick) {
-      this.camera.inertialAlphaOffset -= offsetX / this.angularSensibilityX;
-      this.camera.inertialBetaOffset -= offsetY / this.angularSensibilityY;
+      const cameraDirection = this.camera.target.subtract(this.camera.targetNode.position).normalize();
+      const panningPlane = Plane.FromPositionAndNormal(this.camera.target, cameraDirection);
+      const scene = this.camera.getScene();
+      const xRay = scene.createPickingRay(point.x - 5, point.y, Matrix.Identity(), this.camera, false);
+      const zRay = scene.createPickingRay(point.x, point.y - 5, Matrix.Identity(), this.camera, false);
+      const currentRay = scene.createPickingRay(point.x, point.y, Matrix.Identity(), this.camera, false);
+      const xIntersectionDistance = xRay.intersectsPlane(panningPlane);
+      const zIntersectionDistance = zRay.intersectsPlane(panningPlane);
+      const currentIntersectionDistance = currentRay.intersectsPlane(panningPlane);
+      if (xIntersectionDistance && zIntersectionDistance && currentIntersectionDistance) {
+        const xIntersection = xRay.origin.add(xRay.direction.scale(xIntersectionDistance));
+        const zIntersection = zRay.origin.add(zRay.direction.scale(zIntersectionDistance));
+        const currentIntersection = currentRay.origin.add(currentRay.direction.scale(currentIntersectionDistance));
+
+        const xAxis = xIntersection.subtract(currentIntersection).normalize();
+        const zAxis = zIntersection.subtract(currentIntersection).normalize();
+
+        const rotateX = -offsetY * 0.01;
+        this.camera.targetNode.rotateAround(this.camera.target, xAxis, rotateX);
+
+        const rotateZ = -offsetX * 0.01;
+        this.camera.targetNode.rotateAround(this.camera.target, zAxis, rotateZ);
+      }
     }
   }
 }
 
-export default class LemonCamera extends ArcRotateCamera {
-  private oldRadius: number = 10;
+export default class LemonCamera extends UniversalCamera {
+  private oldRadius: number = 30;
+  public targetNode: TransformNode;
+
+  private observerInfo: Observer<PointerInfo>;
 
   public constructor(scene: Scene) {
-    super("LemonCamera3D", Math.PI / 2, 0, 10, Vector3.Zero(), scene);
-    this.lowerBetaLimit = null;
-    this.upperBetaLimit = null;
-    this.upVector = new Vector3(0, 0, 1);
+    super("LemonCamera3D", new Vector3(0, -30, 0), scene);
+
+    this.targetNode = new TransformNode("LemonCameraTargetNode", scene);
+    this.targetNode.position = new Vector3(0, -30, 0);
 
     this.orthoLeft = -30;
     this.orthoRight = 30;
     this.mode = LemonCamera.ORTHOGRAPHIC_CAMERA;
 
     this.inputs.clear();
-    this.inputs.addMouseWheel();
     this.inputs.add(new LemonArcRotateCameraPointersInput());
-    this._panningMouseButton = 1;
 
-    this.setPosition(new Vector3(-15, -5, 10));
-    this.oldRadius = this.radius;
-
-    this.lowerRadiusLimit = 0.1;
-    this.upperRadiusLimit = 100;
+    this.upVector = new Vector3(0, 0, 1);
+    this.setTarget(new Vector3(0, 0, 0));
+    this.parent = this.targetNode;
 
     this._scene.onBeforeRenderObservable.add(() => {
       const engine = this._scene.getEngine();
       const canvas = engine.getRenderingCanvas();
       if (canvas) {
-        const radius_change_ratio = this.radius / this.oldRadius;
+        const radius = this.target.subtract(this.position).length();
+        const radius_change_ratio = radius / this.oldRadius;
         this.orthoLeft! *= radius_change_ratio;
         this.orthoRight! *= radius_change_ratio;
-        this.oldRadius = this.radius;
+        this.oldRadius = radius;
         const ratio = canvas.height / canvas.width;
         this.orthoTop = this.orthoRight! * ratio;
         this.orthoBottom = this.orthoLeft! * ratio;
       }
     });
+
+    this.observerInfo = this._scene.onPointerObservable.add((pointerInfo) => {
+      if (pointerInfo.type == PointerEventTypes.POINTERWHEEL) {
+        const event = pointerInfo.event as WheelEvent;
+        event.preventDefault();
+        const delta = -event.deltaY * 0.1;
+        this.orthoLeft! += delta;
+        this.orthoRight! -= delta;
+        this.orthoLeft = Math.min(this.orthoLeft!, -1);
+        this.orthoRight = -this.orthoLeft;
+        this.orthoRight = Math.min(Math.max(this.orthoRight!, 1), 500);
+        this.orthoLeft = -this.orthoRight;
+      }
+    });
+  }
+
+  public lookFromTop(): void {}
+
+  public override dispose(): void {
+    this._scene.onPointerObservable.remove(this.observerInfo);
+    super.dispose();
   }
 }

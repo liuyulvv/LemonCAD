@@ -18,8 +18,8 @@ export default class LemonScene extends Scene {
     useLemonStageStore.getState().setInteractorManager(this.interactorManager);
     this.entityManager = new LemonEntityManager();
     useLemonStageStore.getState().setEntityManager(this.entityManager);
-
     this.camera = new LemonCamera(this);
+    useLemonStageStore.getState().setCamera(this.camera);
 
     this.useRightHandedSystem = true;
     this.gravity = new Vector3(0, 0, -9.81);
@@ -60,6 +60,7 @@ export default class LemonScene extends Scene {
   public override dispose(): void {
     this.entityManager.dispose();
     this.interactorManager.dispose();
+    this.camera.dispose();
     super.dispose();
   }
 }

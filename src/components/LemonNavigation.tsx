@@ -6,12 +6,14 @@ import LemonDrawManager from "../draw/LemonDrawManager";
 import useLemonDialogStore from "../store/LemonDialogStore";
 import useLemonFootStore from "../store/LemonFootStore";
 import useLemonSketchStore from "../store/LemonSketchStore";
+import useLemonStageStore from "../store/LemonStageStore";
 import LemonDialog from "./LemonDialog";
 
 function LemonNavigation() {
   const { setTip } = useLemonFootStore();
   const { addDialog } = useLemonDialogStore();
   const { sketchNumber, setSketchNumber } = useLemonSketchStore();
+  const { camera } = useLemonStageStore();
 
   return (
     <div
@@ -19,8 +21,7 @@ function LemonNavigation() {
         display: "flex",
         width: "100%",
         alignItems: "center",
-      }}
-    >
+      }}>
       <Button type="text" icon={<UndoOutlined />} />
       <Button type="text" icon={<RedoOutlined />} />
       <Divider type="vertical" />
@@ -32,12 +33,18 @@ function LemonNavigation() {
           addDialog(uuidv4(), <LemonDialog initialTitle={"Sketch " + sketchNumber} />);
           setSketchNumber(sketchNumber + 1);
         }}
-        icon={<EditOutlined />}
-      >
+        icon={<EditOutlined />}>
         Sketch
       </Button>
       <Button type="text" onClick={() => {}}>
         Line
+      </Button>
+      <Button
+        type="text"
+        onClick={() => {
+          camera.lookFromTop();
+        }}>
+        Top View
       </Button>
     </div>
   );
