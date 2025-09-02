@@ -2,21 +2,30 @@ import { Matrix, Vector3 } from "@babylonjs/core";
 import earcut from "earcut";
 import type LemonGeomInterface from "./LemonGeomInterface";
 import { LemonGeomDiscreteness, LemonGeomType } from "./LemonGeomInterface";
-import LemonVector from "./LemonVector";
+import type { LemonPointJSON } from "./LemonPoint";
+import LemonPoint from "./LemonPoint";
+import type LemonVector from "./LemonVector";
+
+export interface LemonPlaneJSON {
+  origin: LemonPointJSON;
+  xAxis: LemonPointJSON;
+  yAxis: LemonPointJSON;
+  zAxis: LemonPointJSON;
+}
 
 export default class LemonPlane implements LemonGeomInterface {
-  private origin: LemonVector;
-  private xAxis: LemonVector;
-  private yAxis: LemonVector;
-  private zAxis: LemonVector;
+  private origin: LemonPoint;
+  private xAxis: LemonPoint;
+  private yAxis: LemonPoint;
+  private zAxis: LemonPoint;
   private localToWorldMatrix: Matrix;
   private worldToLocalMatrix: Matrix;
 
   public constructor() {
-    this.origin = new LemonVector(0, 0, 0);
-    this.xAxis = new LemonVector(1, 0, 0);
-    this.yAxis = new LemonVector(0, 1, 0);
-    this.zAxis = new LemonVector(0, 0, 1);
+    this.origin = new LemonPoint(0, 0, 0);
+    this.xAxis = new LemonPoint(1, 0, 0);
+    this.yAxis = new LemonPoint(0, 1, 0);
+    this.zAxis = new LemonPoint(0, 0, 1);
     this.localToWorldMatrix = Matrix.Identity();
     this.worldToLocalMatrix = Matrix.Identity();
     this.buildTransform();
@@ -29,32 +38,32 @@ export default class LemonPlane implements LemonGeomInterface {
 
   public static frontPlane(): LemonPlane {
     const plane = new LemonPlane();
-    plane.xAxis = new LemonVector(1, 0, 0);
-    plane.yAxis = new LemonVector(0, 0, 1);
-    plane.zAxis = new LemonVector(0, -1, 0);
+    plane.xAxis = new LemonPoint(1, 0, 0);
+    plane.yAxis = new LemonPoint(0, 0, 1);
+    plane.zAxis = new LemonPoint(0, -1, 0);
     plane.buildTransform();
     return plane;
   }
 
   public static rightPlane(): LemonPlane {
     const plane = new LemonPlane();
-    plane.xAxis = new LemonVector(0, 1, 0);
-    plane.yAxis = new LemonVector(0, 0, 1);
-    plane.zAxis = new LemonVector(1, 0, 0);
+    plane.xAxis = new LemonPoint(0, 1, 0);
+    plane.yAxis = new LemonPoint(0, 0, 1);
+    plane.zAxis = new LemonPoint(1, 0, 0);
     plane.buildTransform();
     return plane;
   }
 
-  public localToWorld(localPoint: Vector3): LemonVector {
-    const point = new LemonVector(localPoint.x, localPoint.y, 0);
-    const result = LemonVector.TransformCoordinates(point, this.localToWorldMatrix);
+  public localToWorld(localPoint: LemonPoint | LemonVector | Vector3): LemonPoint {
+    const point = new LemonPoint(localPoint.x, localPoint.y, 0);
+    const result = LemonPoint.TransformCoordinates(point, this.localToWorldMatrix);
     point.set(result.x, result.y, result.z);
     return point;
   }
 
-  public worldToLocal(worldPoint: Vector3): LemonVector {
-    const result = LemonVector.TransformCoordinates(worldPoint, this.worldToLocalMatrix);
-    const point = new LemonVector(result.x, result.y, 0);
+  public worldToLocal(worldPoint: LemonPoint | LemonVector | Vector3): LemonPoint {
+    const result = LemonPoint.TransformCoordinates(worldPoint, this.worldToLocalMatrix);
+    const point = new LemonPoint(result.x, result.y, 0);
     return point;
   }
 
@@ -155,5 +164,21 @@ export default class LemonPlane implements LemonGeomInterface {
     Matrix.FromXYZAxesToRef(this.xAxis, this.yAxis, this.zAxis, this.localToWorldMatrix);
     this.localToWorldMatrix.setTranslation(this.origin);
     this.worldToLocalMatrix = this.localToWorldMatrix.clone().invert();
+  }
+
+  public serialize(): LemonPlaneJSON {
+    return {
+      origin: this.origin.serialize(),
+      xAxis: this.xAxis.serialize(),
+      yAxis: this.yAxis.serialize(),
+      zAxis: this.zAxis.serialize(),
+    };
+  }
+
+  public deserialize(doc: LemonPlaneJSON): void {
+    this.origin.deserialize(doc.origin);
+    this.xAxis.deserialize(doc.xAxis);
+    this.yAxis.deserialize(doc.yAxis);
+    this.zAxis.deserialize(doc.zAxis);
   }
 }

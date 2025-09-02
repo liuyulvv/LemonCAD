@@ -1,18 +1,24 @@
 import { Mesh, MeshBuilder, Observer, Scene } from "@babylonjs/core";
 import { v4 as uuidv4 } from "uuid";
+import { LemonDocumentType } from "../../documents/LemonDocument";
 import type LemonPoint from "../../geom/LemonPoint";
-import LemonEntity from "./LemonEntity";
+import type { LemonPointJSON } from "../../geom/LemonPoint";
+import LemonEntity, { type LemonEntityDocument } from "./LemonEntity";
+
+export interface LemonPointEntityDocument extends LemonEntityDocument {
+  point: LemonPointJSON;
+}
 
 export default class LemonPointEntity extends LemonEntity {
-  private point: LemonPoint | null = null;
+  private point: LemonPoint;
   private drawNeedUpdate = true;
   private onBeforeRenderObserver: Observer<Scene> | null = null;
   private centerMesh: Mesh | null = null;
   private torusMesh: Mesh | null = null;
 
-  public constructor(point?: LemonPoint, ignoreCameraZoom: boolean = true) {
+  public constructor(point: LemonPoint, ignoreCameraZoom: boolean = true) {
     super();
-    this.point = point || null;
+    this.point = point;
     this.onBeforeRenderObserver = ignoreCameraZoom
       ? this.scene.onBeforeRenderObservable.add(() => {
           const camera = this.scene.activeCamera;
@@ -25,21 +31,18 @@ export default class LemonPointEntity extends LemonEntity {
   }
 
   public draw(forceUpdate: boolean = false): void {
-    if (!this.point) {
-      return;
-    }
     if (forceUpdate) {
       this.drawNeedUpdate = true;
     }
     if (this.drawNeedUpdate) {
       this.getChildMeshes().forEach((child) => child.dispose());
-      this.centerMesh = MeshBuilder.CreateSphere(uuidv4(), { diameter: 0.05 });
+      this.centerMesh = MeshBuilder.CreateSphere(uuidv4(), { diameter: 0.1 });
       this.centerMesh.isPickable = false;
       this.centerMesh.doNotSyncBoundingInfo = true;
       this.centerMesh.material = this.defaultMaterial;
       this.addChild(this.centerMesh);
 
-      this.torusMesh = MeshBuilder.CreateTorus(uuidv4(), { diameter: 0.15, thickness: 0.02 });
+      this.torusMesh = MeshBuilder.CreateTorus(uuidv4(), { diameter: 0.3, thickness: 0.04 });
       this.torusMesh.isPickable = false;
       this.torusMesh.doNotSyncBoundingInfo = true;
       this.torusMesh.rotation.x = -Math.PI / 2;
@@ -85,7 +88,21 @@ export default class LemonPointEntity extends LemonEntity {
       this.scene.onBeforeRenderObservable.remove(this.onBeforeRenderObserver);
       this.onBeforeRenderObserver = null;
     }
-    this.point = null;
     super.dispose(doNotRecurse, disposeMaterialAndTextures);
+  }
+
+  public serialize(): LemonPointEntityDocument {
+    return {
+      getLemonType: () => {
+        return LemonDocumentType.POINT_ENTITY;
+      },
+      id: this.id,
+      point: this.point.serialize(),
+    };
+  }
+
+  public deserialize(doc: LemonPointEntityDocument): void {
+    this.id = doc.id;
+    this.point.deserialize(doc.point);
   }
 }

@@ -18,4 +18,6 @@ export default interface LemonGeomInterface {
   geomType(): LemonGeomType;
   discrete(): LemonGeomDiscreteness;
   discreteOutline(): Array<LemonGeomDiscreteness>;
+  serialize(): object;
+  deserialize(doc: object): void;
 }

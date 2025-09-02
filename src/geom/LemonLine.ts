@@ -1,6 +1,11 @@
 import type LemonGeomInterface from "./LemonGeomInterface";
 import { LemonGeomDiscreteness, LemonGeomType } from "./LemonGeomInterface";
-import LemonPoint from "./LemonPoint";
+import LemonPoint, { type LemonPointJSON } from "./LemonPoint";
+
+export interface LemonLineJSON {
+  source: LemonPointJSON;
+  target: LemonPointJSON;
+}
 
 export class LemonLine implements LemonGeomInterface {
   private source: LemonPoint;
@@ -40,5 +45,17 @@ export class LemonLine implements LemonGeomInterface {
 
   public discreteOutline(): Array<LemonGeomDiscreteness> {
     return [];
+  }
+
+  public serialize(): LemonLineJSON {
+    return {
+      source: this.source.serialize(),
+      target: this.target.serialize(),
+    };
+  }
+
+  public deserialize(doc: LemonLineJSON): void {
+    this.source.deserialize(doc.source);
+    this.target.deserialize(doc.target);
   }
 }

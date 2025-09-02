@@ -1,6 +1,12 @@
 import { Mesh, Scene, StandardMaterial } from "@babylonjs/core";
 import { v4 as uuidv4 } from "uuid";
+import type LemonDocument from "../../documents/LemonDocument";
+import { LemonDocumentType } from "../../documents/LemonDocument";
 import LemonMaterialManager from "../LemonMaterialManager";
+
+export interface LemonEntityDocument extends LemonDocument {
+  id: string;
+}
 
 export default class LemonEntity extends Mesh {
   protected scene: Scene = this._scene;
@@ -13,7 +19,6 @@ export default class LemonEntity extends Mesh {
 
   public constructor() {
     super(uuidv4());
-
     this.defaultMaterial = LemonMaterialManager.getInstance().getDefaultMaterial();
     this.selectedMaterial = LemonMaterialManager.getInstance().getSelectedMaterial();
     this.hoveredMaterial = LemonMaterialManager.getInstance().getHoveredMaterial();
@@ -41,9 +46,9 @@ export default class LemonEntity extends Mesh {
     return this.getChildren().map((child) => child as LemonEntity);
   }
 
-  public getAllChildrenEntity(): Array<LemonEntity> {
-    return this.getChildMeshes().map((child) => child as LemonEntity);
-  }
+  // public getAllChildrenEntity(): Array<LemonEntity> {
+  //   return this.getChildMeshes().map((child) => child as LemonEntity);
+  // }
 
   public isSelected(): boolean {
     return this.selectedStatus;
@@ -83,5 +88,18 @@ export default class LemonEntity extends Mesh {
     this.defaultMaterial.dispose();
     this.selectedMaterial.dispose();
     this.hoveredMaterial.dispose();
+  }
+
+  public serialize(): LemonEntityDocument {
+    return {
+      getLemonType: () => {
+        return LemonDocumentType.ENTITY;
+      },
+      id: this.id,
+    };
+  }
+
+  public deserialize(doc: LemonEntityDocument): void {
+    this.id = doc.id;
   }
 }

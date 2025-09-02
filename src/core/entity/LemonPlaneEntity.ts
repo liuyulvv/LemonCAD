@@ -1,11 +1,16 @@
 import { Mesh, MeshBuilder, Observer, Scene, StandardMaterial, VertexData } from "@babylonjs/core";
 import { v4 as uuidv4 } from "uuid";
-import LemonPlane from "../../geom/LemonPlane";
+import { LemonDocumentType } from "../../documents/LemonDocument";
+import LemonPlane, { type LemonPlaneJSON } from "../../geom/LemonPlane";
 import LemonVector from "../../geom/LemonVector";
-import LemonEntity from "./LemonEntity";
+import LemonEntity, { type LemonEntityDocument } from "./LemonEntity";
+
+export interface LemonPlaneEntityDocument extends LemonEntityDocument {
+  plane: LemonPlaneJSON;
+}
 
 export default class LemonPlaneEntity extends LemonEntity {
-  private plane: LemonPlane | null = null;
+  private plane: LemonPlane;
   private drawNeedUpdate = true;
   private planeMesh: Mesh | null = null;
   private outlineMesh: Mesh | null = null;
@@ -13,9 +18,9 @@ export default class LemonPlaneEntity extends LemonEntity {
   private outlineMaterial: StandardMaterial;
   private onBeforeRenderObserver: Observer<Scene>;
 
-  public constructor(plane?: LemonPlane) {
+  public constructor(plane: LemonPlane) {
     super();
-    this.plane = plane || null;
+    this.plane = plane;
     this.outlineMaterial = this.defaultMaterial.clone(uuidv4());
     this.defaultMaterial.alpha = 0.15;
     this.selectedMaterial.alpha = 0.15;
@@ -35,31 +40,7 @@ export default class LemonPlaneEntity extends LemonEntity {
     });
   }
 
-  public static topPlane(): LemonPlaneEntity {
-    const plane = LemonPlane.topPlane();
-    const entity = new LemonPlaneEntity();
-    entity.plane = plane;
-    return entity;
-  }
-
-  public static frontPlane(): LemonPlaneEntity {
-    const plane = LemonPlane.frontPlane();
-    const entity = new LemonPlaneEntity();
-    entity.plane = plane;
-    return entity;
-  }
-
-  public static rightPlane(): LemonPlaneEntity {
-    const plane = LemonPlane.rightPlane();
-    const entity = new LemonPlaneEntity();
-    entity.plane = plane;
-    return entity;
-  }
-
   public draw(forceUpdate: boolean = false): void {
-    if (!this.plane) {
-      return;
-    }
     if (forceUpdate) {
       this.drawNeedUpdate = true;
     }
@@ -105,6 +86,10 @@ export default class LemonPlaneEntity extends LemonEntity {
     }
   }
 
+  public getPlane(): LemonPlane {
+    return this.plane;
+  }
+
   public onSelected(selected: boolean): void {
     super.onSelected(selected);
     if (this.planeMesh) {
@@ -133,5 +118,20 @@ export default class LemonPlaneEntity extends LemonEntity {
       this.scene.onBeforeRenderObservable.remove(this.onBeforeRenderObserver);
     }
     super.dispose(doNotRecurse, disposeMaterialAndTextures);
+  }
+
+  public serialize(): LemonPlaneEntityDocument {
+    return {
+      getLemonType: () => {
+        return LemonDocumentType.PLANE_ENTITY;
+      },
+      id: this.id,
+      plane: this.plane.serialize(),
+    };
+  }
+
+  public deserialize(doc: LemonPlaneEntityDocument): void {
+    this.id = doc.id;
+    this.plane.deserialize(doc.plane);
   }
 }

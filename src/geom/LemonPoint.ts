@@ -2,6 +2,12 @@ import type LemonGeomInterface from "./LemonGeomInterface";
 import { LemonGeomDiscreteness, LemonGeomType } from "./LemonGeomInterface";
 import LemonVector from "./LemonVector";
 
+export interface LemonPointJSON {
+  x: number;
+  y: number;
+  z: number;
+}
+
 export default class LemonPoint extends LemonVector implements LemonGeomInterface {
   public constructor(x?: number, y?: number, z?: number) {
     super(x, y, z);
@@ -24,5 +30,19 @@ export default class LemonPoint extends LemonVector implements LemonGeomInterfac
 
   public discreteOutline(): Array<LemonGeomDiscreteness> {
     return [];
+  }
+
+  public serialize(): LemonPointJSON {
+    return {
+      x: this.x,
+      y: this.y,
+      z: this.z,
+    };
+  }
+
+  public deserialize(doc: LemonPointJSON): void {
+    this.x = doc.x;
+    this.y = doc.y;
+    this.z = doc.z;
   }
 }
