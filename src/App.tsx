@@ -48,8 +48,7 @@ export default function App() {
           <Splitter
             onResize={(sizes) => {
               setAsideSize(sizes[0]);
-            }}
-          >
+            }}>
             <Splitter.Panel size={collapsed ? 32 : asideSize} min={collapsed ? 32 : 225} resizable={collapsed ? false : true}>
               <LemonAside />
             </Splitter.Panel>
@@ -60,9 +59,7 @@ export default function App() {
         </div>
         <LemonFooter />
       </div>
-      {Array.from(dialogs.entries()).map(([id, dialog]) => (
-        <div key={id}>{dialog}</div>
-      ))}
+      {Array.from(dialogs.entries()).map(([id, dialogInterface]) => (dialogInterface.visible ? <div key={id}>{dialogInterface.dialog}</div> : null))}
     </div>
   );
 }
