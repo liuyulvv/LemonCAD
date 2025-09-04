@@ -200,7 +200,7 @@ export default class LemonInteractorManager {
       while (root.parent) {
         root = root.parent as LemonEntity;
       }
-      let entity = root as LemonEntity;
+      const entity = root as LemonEntity;
       return entity.isEnabled() && entity.isVisible && entity.isPickable;
     });
     return info ? info : [];

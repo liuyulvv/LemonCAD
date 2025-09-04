@@ -91,10 +91,14 @@ export default class LemonPointEntity extends LemonEntity {
     super.dispose(doNotRecurse, disposeMaterialAndTextures);
   }
 
+  public getEntityType(): LemonDocumentType {
+    return LemonDocumentType.PointEntity;
+  }
+
   public serialize(): LemonPointEntityDocument {
     return {
       getLemonType: () => {
-        return LemonDocumentType.POINT_ENTITY;
+        return LemonDocumentType.PointEntity;
       },
       id: this.id,
       point: this.point.serialize(),

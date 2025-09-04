@@ -12,9 +12,13 @@ interface AsideStore {
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
   geometryData: LemonGeometryData[];
-  setGeometryData: (data: LemonGeometryData[]) => void;
+  pushGeometryData: (data: { title: string; key: string }) => void;
   geometryNodeIconVisibleMap: Record<string, boolean>;
   setGeometryNodeIconVisible: (key: string, visible: boolean) => void;
+  selectedEntities: string[];
+  setSelectedEntities: (ids: string[]) => void;
+  pushSelectedEntity: (id: string) => void;
+  removeSelectedEntity: (id: string) => void;
 }
 
 const useLemonAsideStore = create<AsideStore>()((set) => ({
@@ -34,11 +38,21 @@ const useLemonAsideStore = create<AsideStore>()((set) => ({
       ],
     },
   ],
-  setGeometryData: (data) => set({ geometryData: data }),
+  pushGeometryData: (data: { title: string; key: string }) => set((state) => ({ geometryData: [...state.geometryData, data] })),
   geometryNodeIconVisibleMap: {},
   setGeometryNodeIconVisible: (key, visible) =>
     set((state) => ({
       geometryNodeIconVisibleMap: { ...state.geometryNodeIconVisibleMap, [key]: visible },
+    })),
+  selectedEntities: [],
+  setSelectedEntities: (ids) => set({ selectedEntities: ids }),
+  pushSelectedEntity: (id) =>
+    set((state) => ({
+      selectedEntities: [...new Set([...state.selectedEntities, id])],
+    })),
+  removeSelectedEntity: (id) =>
+    set((state) => ({
+      selectedEntities: state.selectedEntities.filter((eid) => eid !== id),
     })),
 }));
 

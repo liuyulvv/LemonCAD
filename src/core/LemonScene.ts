@@ -1,5 +1,6 @@
-import { AxesViewer, Color4, Scene, Vector3, WebGPUEngine } from "@babylonjs/core";
-import LemonPoint from "../geom/LemonPoint";
+import { Color4, Scene, Vector3, WebGPUEngine } from "@babylonjs/core";
+import LemonCADDocument from "../documents/LemonCADDocument";
+import LemonDrawManager from "../draw/LemonDrawManager";
 import useLemonStageStore from "../store/LemonStageStore";
 import LemonCamera from "./LemonCamera";
 import LemonEntityManager from "./entity/LemonEntityManager";
@@ -11,6 +12,7 @@ export default class LemonScene extends Scene {
   private camera: LemonCamera;
   private interactorManager: LemonInteractorManager;
   private entityManager: LemonEntityManager;
+  private document: LemonCADDocument;
 
   public constructor(engine: WebGPUEngine, canvas: HTMLCanvasElement) {
     super(engine, undefined);
@@ -20,6 +22,7 @@ export default class LemonScene extends Scene {
     useLemonStageStore.getState().setEntityManager(this.entityManager);
     this.camera = new LemonCamera(this);
     useLemonStageStore.getState().setCamera(this.camera);
+    useLemonStageStore.getState().setDrawManager(LemonDrawManager.getInstance());
 
     this.useRightHandedSystem = true;
     this.gravity = new Vector3(0, 0, -9.81);
@@ -28,25 +31,24 @@ export default class LemonScene extends Scene {
     this.camera.attachControl(canvas, true);
     this.activeCamera = this.camera;
 
-    new AxesViewer(this);
+    this.document = new LemonCADDocument();
 
-    const topPlane = LemonPlaneEntity.topPlane();
+    const topPlane = new LemonPlaneEntity(this.document.topPlane);
     topPlane.id = "top-plane";
     topPlane.name = topPlane.id;
     topPlane.draw(true);
 
-    const frontPlane = LemonPlaneEntity.frontPlane();
+    const frontPlane = new LemonPlaneEntity(this.document.frontPlane);
     frontPlane.id = "front-plane";
     frontPlane.name = frontPlane.id;
     frontPlane.draw(true);
 
-    const rightPlane = LemonPlaneEntity.rightPlane();
+    const rightPlane = new LemonPlaneEntity(this.document.rightPlane);
     rightPlane.id = "right-plane";
     rightPlane.name = rightPlane.id;
     rightPlane.draw(true);
 
-    const point = new LemonPoint(0, 0, 0);
-    const pointEntity = new LemonPointEntity(point);
+    const pointEntity = new LemonPointEntity(this.document.origin);
     pointEntity.id = "origin-point";
     pointEntity.name = pointEntity.id;
     pointEntity.draw(true);
@@ -55,6 +57,10 @@ export default class LemonScene extends Scene {
     this.entityManager.addEntity(frontPlane);
     this.entityManager.addEntity(rightPlane);
     this.entityManager.addEntity(pointEntity);
+  }
+
+  public open(document: LemonCADDocument): void {
+    this.document = document;
   }
 
   public override dispose(): void {

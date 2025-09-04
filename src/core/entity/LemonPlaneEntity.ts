@@ -120,10 +120,14 @@ export default class LemonPlaneEntity extends LemonEntity {
     super.dispose(doNotRecurse, disposeMaterialAndTextures);
   }
 
+  public getEntityType(): LemonDocumentType {
+    return LemonDocumentType.PlaneEntity;
+  }
+
   public serialize(): LemonPlaneEntityDocument {
     return {
       getLemonType: () => {
-        return LemonDocumentType.PLANE_ENTITY;
+        return LemonDocumentType.PlaneEntity;
       },
       id: this.id,
       plane: this.plane.serialize(),

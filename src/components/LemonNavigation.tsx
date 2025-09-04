@@ -1,19 +1,31 @@
-import { EditOutlined, RedoOutlined, UndoOutlined } from "@ant-design/icons";
+import { RedoOutlined, UndoOutlined } from "@ant-design/icons";
 import { Button, Divider } from "antd";
-import { v4 as uuidv4 } from "uuid";
-import { LemonDrawType } from "../draw/LemonDrawInterface";
-import LemonDrawManager from "../draw/LemonDrawManager";
-import useLemonDialogStore from "../store/LemonDialogStore";
-import useLemonFootStore from "../store/LemonFootStore";
-import useLemonSketchStore from "../store/LemonSketchStore";
+import React, { useEffect, useState } from "react";
 import useLemonStageStore from "../store/LemonStageStore";
-import LemonDialog from "./LemonDialog";
+import LemonSketchButton from "./sketch/LemonSketchButton";
+import LemonSketchLineButton from "./sketch/LemonSketchLineButton";
+
+interface NavItem {
+  type: "divider" | "component";
+  name: string;
+  filter: string;
+}
 
 function LemonNavigation() {
-  const { setTip } = useLemonFootStore();
-  const { addDialog } = useLemonDialogStore();
-  const { sketchNumber, setSketchNumber } = useLemonSketchStore();
   const { camera } = useLemonStageStore();
+  const [navItems, setNavItems] = useState<NavItem[]>([]);
+  const { stageMode } = useLemonStageStore();
+
+  const customComponents: { [key: string]: React.ReactNode } = {
+    LemonSketchButton: <LemonSketchButton />,
+    LemonSketchLineButton: <LemonSketchLineButton />,
+  };
+
+  useEffect(() => {
+    fetch("/navigation.json")
+      .then((res) => res.json())
+      .then((data) => setNavItems(data));
+  }, []);
 
   return (
     <div
@@ -28,24 +40,23 @@ function LemonNavigation() {
       <Button
         type="text"
         onClick={() => {
-          setTip("Sketch mode activated. You can now draw on the canvas.");
-          LemonDrawManager.getInstance().beginDraw(LemonDrawType.Sketch);
-          addDialog(uuidv4(), <LemonDialog initialTitle={"Sketch " + sketchNumber} />);
-          setSketchNumber(sketchNumber + 1);
-        }}
-        icon={<EditOutlined />}>
-        Sketch
-      </Button>
-      <Button type="text" onClick={() => {}}>
-        Line
-      </Button>
-      <Button
-        type="text"
-        onClick={() => {
           camera.lookFromTop();
         }}>
         Top View
       </Button>
+      <Divider type="vertical" />
+      {navItems.map((item, index) => {
+        switch (item.type) {
+          case "divider":
+            return <Divider key={index} type="vertical" />;
+          case "component":
+            return item.filter.includes(stageMode) && item.name && customComponents[item.name] ? (
+              <React.Fragment key={index}>{customComponents[item.name]}</React.Fragment>
+            ) : null;
+          default:
+            return null;
+        }
+      })}
     </div>
   );
 }

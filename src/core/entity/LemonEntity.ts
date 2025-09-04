@@ -2,6 +2,7 @@ import { Mesh, Scene, StandardMaterial } from "@babylonjs/core";
 import { v4 as uuidv4 } from "uuid";
 import type LemonDocument from "../../documents/LemonDocument";
 import { LemonDocumentType } from "../../documents/LemonDocument";
+import useLemonAsideStore from "../../store/LemonAsideStore";
 import LemonMaterialManager from "../LemonMaterialManager";
 
 export interface LemonEntityDocument extends LemonDocument {
@@ -62,7 +63,9 @@ export default class LemonEntity extends Mesh {
     this.selectedStatus = selected;
     if (selected) {
       this.material = this.selectedMaterial;
+      useLemonAsideStore.getState().pushSelectedEntity(this.id);
     } else {
+      useLemonAsideStore.getState().removeSelectedEntity(this.id);
       if (this.hoveredStatus) {
         this.material = this.hoveredMaterial;
       } else {
@@ -90,10 +93,14 @@ export default class LemonEntity extends Mesh {
     this.hoveredMaterial.dispose();
   }
 
+  public getEntityType(): LemonDocumentType {
+    return LemonDocumentType.Entity;
+  }
+
   public serialize(): LemonEntityDocument {
     return {
       getLemonType: () => {
-        return LemonDocumentType.ENTITY;
+        return LemonDocumentType.Entity;
       },
       id: this.id,
     };

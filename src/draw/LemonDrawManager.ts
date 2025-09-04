@@ -39,8 +39,13 @@ export default class LemonDrawManager {
 
   public endDraw(): void {
     if (this.currentDraw) {
-      this.currentDraw.shutdown();
+      this.currentDraw.end();
     }
+    this.currentDraw = null;
+  }
+
+  public shutdown(): void {
+    this.currentDraw?.shutdown();
     this.currentDraw = null;
   }
 }

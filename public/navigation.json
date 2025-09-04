@@ -1,0 +1,12 @@
+[
+  {
+    "type": "component",
+    "name": "LemonSketchButton",
+    "filter": "Feature,Sketch"
+  },
+  {
+    "type": "component",
+    "name": "LemonSketchLineButton",
+    "filter": "Sketch"
+  }
+]

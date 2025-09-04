@@ -1,9 +1,9 @@
 export enum LemonDocumentType {
   CAD,
-  ENTITY,
-  POINT_ENTITY,
-  LINE_ENTITY,
-  PLANE_ENTITY,
+  Entity,
+  PointEntity,
+  LineEntity,
+  PlaneEntity,
 }
 
 export default interface LemonDocument {

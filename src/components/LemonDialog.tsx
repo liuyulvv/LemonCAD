@@ -4,7 +4,8 @@ import { Button, Input, Space, Typography, type InputRef } from "antd";
 import React, { useEffect, useRef, useState } from "react";
 import useLemonDialogStore from "../store/LemonDialogStore";
 
-interface LemonDialogProps {
+export interface LemonDialogProps {
+  id: string;
   initialTitle?: string;
   initialPosition?: { x: number; y: number };
   enableEdit?: boolean;
@@ -59,6 +60,7 @@ const useStyles = makeStyles({
 });
 
 export default function LemonDialog({
+  id,
   initialTitle = "Sketch",
   initialPosition = { x: 225, y: 32 },
   enableEdit = true,
@@ -68,6 +70,9 @@ export default function LemonDialog({
 }: LemonDialogProps) {
   const styles = useStyles();
 
+  const { maxZIndex, setMaxZIndex } = useLemonDialogStore();
+  const { hideDialog } = useLemonDialogStore();
+
   const [position, setPosition] = useState(initialPosition);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -75,7 +80,6 @@ export default function LemonDialog({
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(initialTitle);
   const [editButtonVisible, setEditButtonVisible] = useState(false);
-  const { maxZIndex, setMaxZIndex } = useLemonDialogStore();
   const [zIndex, setZIndex] = useState(maxZIndex);
 
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -164,8 +168,7 @@ export default function LemonDialog({
       onMouseDown={() => {
         setZIndex(maxZIndex + 1);
         setMaxZIndex(maxZIndex + 1);
-      }}
-    >
+      }}>
       <div className={styles.resizeRegion} onMouseDown={handleResizeMouseDown}></div>
       <div className={styles.header} onMouseDown={handleDragMouseDown}>
         <div
@@ -179,8 +182,7 @@ export default function LemonDialog({
             if (!isEditing) {
               setEditButtonVisible(false);
             }
-          }}
-        >
+          }}>
           {isEditing ? (
             <Input size="small" value={title} onChange={(e) => setTitle(e.target.value)} ref={titleInputRef} onBlur={() => setIsEditing(false)} />
           ) : (
@@ -189,8 +191,7 @@ export default function LemonDialog({
                 className={styles.title}
                 style={{
                   maxWidth: dialogWidth - 80,
-                }}
-              >
+                }}>
                 {title}
               </Typography.Text>
               {editButtonVisible ? (
@@ -207,8 +208,27 @@ export default function LemonDialog({
           )}
         </div>
         <Space.Compact>
-          <Button type="primary" icon={<CheckOutlined />} size="small" onClick={onConfirm} variant="solid" />
-          <Button type="text" icon={<CloseOutlined />} size="small" onClick={onCancel} color="danger" variant="solid" />
+          <Button
+            type="primary"
+            icon={<CheckOutlined />}
+            size="small"
+            onClick={() => {
+              onConfirm ? onConfirm() : null;
+              hideDialog(id);
+            }}
+            variant="solid"
+          />
+          <Button
+            type="text"
+            icon={<CloseOutlined />}
+            size="small"
+            onClick={() => {
+              onCancel ? onCancel() : null;
+              hideDialog(id);
+            }}
+            color="danger"
+            variant="solid"
+          />
         </Space.Compact>
       </div>
       <div className={styles.content}>{children}</div>

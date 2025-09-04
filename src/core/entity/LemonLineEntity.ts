@@ -73,10 +73,14 @@ export default class LemonLineEntity extends LemonEntity {
     super.dispose(doNotRecurse, disposeMaterialAndTextures);
   }
 
+  public getEntityType(): LemonDocumentType {
+    return LemonDocumentType.LineEntity;
+  }
+
   public serialize(): LemonLineEntityDocument {
     return {
       getLemonType: () => {
-        return LemonDocumentType.LINE_ENTITY;
+        return LemonDocumentType.LineEntity;
       },
       id: this.id,
       line: this.line.serialize(),
