@@ -20,6 +20,7 @@ export default class LemonPlaneEntity extends LemonEntity {
 
   public constructor(plane: LemonPlane) {
     super();
+    this.entityName = "Plane";
     this.plane = plane;
     this.outlineMaterial = this.defaultMaterial.clone(uuidv4());
     this.defaultMaterial.alpha = 0.15;

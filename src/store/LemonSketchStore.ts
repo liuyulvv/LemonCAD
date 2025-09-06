@@ -1,22 +1,27 @@
 import { create } from "zustand";
+import type LemonEntity from "../core/entity/LemonEntity";
 import type LemonSketchEntity from "../core/entity/LemonSketchEntity";
 
 interface SketchStore {
-  sketchNumber: number;
-  setSketchNumber: (number: number) => void;
-  sketchName: string;
-  setSketchName: (name: string) => void;
-  sketchEntity: LemonSketchEntity | null;
-  setSketchEntity: (entity: LemonSketchEntity | null) => void;
+  createSketchNumber: number;
+  updateCreateSketchNumber: (number: number) => void;
+  createSketchName: string;
+  setCreateSketchName: (name: string) => void;
+  createSketchEntity: LemonSketchEntity | null;
+  setCreateSketchEntity: (entity: LemonSketchEntity | null) => void;
+  createSketchPlaneEntity: LemonEntity | null;
+  setCreateSketchPlaneEntity: (entity: LemonEntity | null) => void;
 }
 
 const useLemonSketchStore = create<SketchStore>((set) => ({
-  sketchNumber: 1,
-  setSketchNumber: (sketchNumber) => set({ sketchNumber }),
-  sketchName: "Sketch1",
-  setSketchName: (name) => set({ sketchName: name }),
-  sketchEntity: null,
-  setSketchEntity: (entity) => set({ sketchEntity: entity }),
+  createSketchNumber: 1,
+  updateCreateSketchNumber: (createSketchNumber) => set({ createSketchNumber: createSketchNumber + 1 }),
+  createSketchName: "Sketch1",
+  setCreateSketchName: (name) => set({ createSketchName: name }),
+  createSketchEntity: null,
+  setCreateSketchEntity: (entity) => set({ createSketchEntity: entity }),
+  createSketchPlaneEntity: null,
+  setCreateSketchPlaneEntity: (entity) => set({ createSketchPlaneEntity: entity }),
 }));
 
 export default useLemonSketchStore;

@@ -92,7 +92,7 @@ export default class LemonInteractorManager {
     }
     const pickedEntity = this.pickEntity();
     if (pickedEntity) {
-      pickedEntity.isSelected() ? this.removePickedEntity(pickedEntity) : this.insertPickedEntity(pickedEntity);
+      pickedEntity.isSelected() ? this.removePickedEntity(pickedEntity) : this.pushPickedEntity(pickedEntity);
     }
   }
 
@@ -168,7 +168,7 @@ export default class LemonInteractorManager {
     }
   }
 
-  public insertPickedEntity(entity: LemonEntity) {
+  public pushPickedEntity(entity: LemonEntity) {
     this.pickedEntities.push(entity);
     entity.onSelected(true);
   }

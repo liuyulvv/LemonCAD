@@ -1,6 +1,7 @@
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { Button, Tree } from "antd";
 import { useEffect, useRef, useState } from "react";
+import { LemonDocumentType } from "../documents/LemonDocument";
 import useLemonAsideStore, { type LemonGeometryData } from "../store/LemonAsideStore";
 import useLemonStageStore from "../store/LemonStageStore";
 import LemonGeometryNode from "./LemonGeometryNode";
@@ -48,6 +49,15 @@ function LemonAside() {
     return keys;
   };
 
+  const findEntityIDByName = (nodes: LemonGeometryData[], name: string): string | null => {
+    for (const node of nodes) {
+      if (node.title == name) {
+        return node.key;
+      }
+    }
+    return null;
+  };
+
   useEffect(() => {
     const nodes = generateTreeNodes(geometryData);
     const keys = generateExpandedKeys(nodes);
@@ -72,13 +82,30 @@ function LemonAside() {
           onExpand={(keys) => {
             setExpandedKeys(keys);
           }}
+          onDoubleClick={(e) => {
+            const target = e.target as HTMLElement;
+            const content = target.textContent || target.innerText;
+            const entityID = findEntityIDByName(geometryData, content);
+            if (entityID) {
+              const entity = entityManager.getEntity(entityID);
+              if (entity) {
+                if (entity.getEntityType() == LemonDocumentType.SketchEntity) {
+                  interactorManager.clearPickedEntities();
+                  interactorManager.pushPickedEntity(entity);
+                }
+              }
+            }
+          }}
           onSelect={(value, info) => {
             setSelectedEntities(value as string[]);
             if (info.node.key) {
               const entity = entityManager.getEntity(info.node.key as string);
               if (entity) {
+                if (entity.getEntityType() == LemonDocumentType.SketchEntity) {
+                  return;
+                }
                 if (info.selected) {
-                  interactorManager.insertPickedEntity(entity);
+                  interactorManager.pushPickedEntity(entity);
                 } else {
                   interactorManager.removePickedEntity(entity);
                 }

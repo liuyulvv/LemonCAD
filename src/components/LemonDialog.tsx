@@ -12,6 +12,7 @@ export interface LemonDialogProps {
   children?: React.ReactNode;
   onConfirm?: () => void;
   onCancel?: () => void;
+  onTitleChange?: (title: string) => void;
 }
 
 const useStyles = makeStyles({
@@ -67,6 +68,7 @@ export default function LemonDialog({
   children,
   onConfirm,
   onCancel,
+  onTitleChange,
 }: LemonDialogProps) {
   const styles = useStyles();
 
@@ -81,6 +83,11 @@ export default function LemonDialog({
   const [title, setTitle] = useState(initialTitle);
   const [editButtonVisible, setEditButtonVisible] = useState(false);
   const [zIndex, setZIndex] = useState(maxZIndex);
+
+  const updateTitle = (newTitle: string) => {
+    setTitle(newTitle);
+    onTitleChange?.(newTitle);
+  };
 
   const dragOffset = useRef({ x: 0, y: 0 });
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -184,7 +191,7 @@ export default function LemonDialog({
             }
           }}>
           {isEditing ? (
-            <Input size="small" value={title} onChange={(e) => setTitle(e.target.value)} ref={titleInputRef} onBlur={() => setIsEditing(false)} />
+            <Input size="small" value={title} onChange={(e) => updateTitle(e.target.value)} ref={titleInputRef} onBlur={() => setIsEditing(false)} />
           ) : (
             <div className={styles.center}>
               <Typography.Text

@@ -10,6 +10,8 @@ export interface LemonEntityDocument extends LemonDocument {
 }
 
 export default class LemonEntity extends Mesh {
+  protected entityID: string;
+  protected entityName: string;
   protected scene: Scene = this._scene;
   protected selectedStatus: boolean = false;
   protected hoveredStatus: boolean = false;
@@ -20,9 +22,19 @@ export default class LemonEntity extends Mesh {
 
   public constructor() {
     super(uuidv4());
+    this.entityID = this.id;
+    this.entityName = "Entity";
     this.defaultMaterial = LemonMaterialManager.getInstance().getDefaultMaterial();
     this.selectedMaterial = LemonMaterialManager.getInstance().getSelectedMaterial();
     this.hoveredMaterial = LemonMaterialManager.getInstance().getHoveredMaterial();
+  }
+
+  public getEntityName(): string {
+    return this.entityName;
+  }
+
+  public setEntityName(name: string): void {
+    this.entityName = name;
   }
 
   public show(flag: boolean): void {

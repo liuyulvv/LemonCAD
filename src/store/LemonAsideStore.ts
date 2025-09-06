@@ -12,7 +12,8 @@ interface AsideStore {
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
   geometryData: LemonGeometryData[];
-  pushGeometryData: (data: { title: string; key: string }) => void;
+  pushGeometryData: (data: LemonGeometryData) => void;
+  renameGeometryData: (key: string, title: string) => void;
   geometryNodeIconVisibleMap: Record<string, boolean>;
   setGeometryNodeIconVisible: (key: string, visible: boolean) => void;
   selectedEntities: string[];
@@ -38,7 +39,12 @@ const useLemonAsideStore = create<AsideStore>()((set) => ({
       ],
     },
   ],
-  pushGeometryData: (data: { title: string; key: string }) => set((state) => ({ geometryData: [...state.geometryData, data] })),
+  pushGeometryData: (data: LemonGeometryData) => set((state) => ({ geometryData: [...state.geometryData, data] })),
+  renameGeometryData: (key, title) => {
+    set((state) => ({
+      geometryData: state.geometryData.map((item) => (item.key === key ? { ...item, title } : item)),
+    }));
+  },
   geometryNodeIconVisibleMap: {},
   setGeometryNodeIconVisible: (key, visible) =>
     set((state) => ({

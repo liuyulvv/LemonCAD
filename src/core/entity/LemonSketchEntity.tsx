@@ -1,9 +1,11 @@
-import { Input } from "antd";
 import { v4 as uuidv4 } from "uuid";
-import LemonDialog from "../../components/LemonDialog";
+import LemonSketchDialog from "../../components/sketch/LemonSketchDialog";
+import { LemonDocumentType } from "../../documents/LemonDocument";
+import { LemonDrawType } from "../../draw/LemonDrawInterface";
+import useLemonAsideStore from "../../store/LemonAsideStore";
 import useLemonDialogStore from "../../store/LemonDialogStore";
 import useLemonSketchStore from "../../store/LemonSketchStore";
-import useLemonStageStore from "../../store/LemonStageStore";
+import useLemonStageStore, { LemonStageMode } from "../../store/LemonStageStore";
 import LemonEntity from "./LemonEntity";
 
 export default class LemonSketchEntity extends LemonEntity {
@@ -14,18 +16,23 @@ export default class LemonSketchEntity extends LemonEntity {
   public constructor() {
     super();
     this.sketchName = "Sketch";
+    useLemonAsideStore.getState().pushGeometryData({ title: this.sketchName, key: this.id, selectable: false });
   }
 
   public setSketchName(name: string) {
     this.sketchName = name;
+    useLemonAsideStore.getState().renameGeometryData(this.id, this.sketchName);
   }
 
   public getSketchName(): string {
     return this.sketchName;
   }
 
-  public setPlaneEntityID(id: string) {
+  public setPlaneEntityID(id: string | null) {
     this.planeEntityID = id;
+    if (id == null && this.isSelected()) {
+      useLemonStageStore.getState().drawManager.beginDraw(LemonDrawType.Sketch);
+    }
   }
 
   public getPlaneEntityID(): string | null {
@@ -37,32 +44,30 @@ export default class LemonSketchEntity extends LemonEntity {
       useLemonDialogStore.getState().removeDialog(this.dialogID);
     }
     this.dialogID = uuidv4();
+    useLemonSketchStore.getState().setCreateSketchName(this.sketchName);
     useLemonDialogStore.getState().addDialog({
       id: this.dialogID,
-      visible: false,
+      visible: true,
       dialog: (
-        <LemonDialog
-          id={this.dialogID}
+        <LemonSketchDialog
+          dialogID={this.dialogID}
           initialTitle={this.sketchName}
           onConfirm={() => {
+            this.setSketchName(useLemonSketchStore.getState().createSketchName);
+            const planeEntity = useLemonSketchStore.getState().createSketchPlaneEntity;
+            if (planeEntity) {
+              this.setPlaneEntityID(planeEntity.id);
+            } else {
+              this.setPlaneEntityID(null);
+            }
             useLemonStageStore.getState().interactorManager.removePickedEntity(this);
+            useLemonStageStore.getState().drawManager.endDraw();
           }}
           onCancel={() => {
-            useLemonDialogStore.getState().hideDialog(this.dialogID!);
             useLemonStageStore.getState().interactorManager.removePickedEntity(this);
-          }}>
-          <Input
-            addonBefore="Sketch plane"
-            allowClear
-            defaultValue={this.sketchName}
-            onChange={(e) => {
-              useLemonSketchStore.getState().setSketchName(e.target.value);
-            }}
-            onClear={() => {
-              useLemonSketchStore.getState().setSketchName("");
-            }}
-          />
-        </LemonDialog>
+            useLemonStageStore.getState().drawManager.endDraw();
+          }}
+        />
       ),
     });
   }
@@ -70,13 +75,32 @@ export default class LemonSketchEntity extends LemonEntity {
   public onSelected(selected: boolean): void {
     super.onSelected(selected);
     if (selected) {
-      if (this.dialogID) {
-        useLemonDialogStore.getState().showDialog(this.dialogID);
+      this.createDialog();
+      useLemonSketchStore.getState().setCreateSketchEntity(this);
+      useLemonStageStore.getState().setStageMode(LemonStageMode.Sketch);
+      if (this.planeEntityID) {
+        const planeEntity = useLemonStageStore.getState().entityManager.getEntity(this.planeEntityID);
+        if (planeEntity) {
+          useLemonSketchStore.getState().setCreateSketchPlaneEntity(planeEntity);
+        } else {
+          useLemonSketchStore.getState().setCreateSketchPlaneEntity(null);
+        }
+      } else {
+        useLemonSketchStore.getState().setCreateSketchPlaneEntity(null);
+        useLemonStageStore.getState().drawManager.beginDraw(LemonDrawType.Sketch);
       }
     } else {
       if (this.dialogID) {
-        useLemonDialogStore.getState().hideDialog(this.dialogID);
+        useLemonDialogStore.getState().removeDialog(this.dialogID);
+        this.dialogID = null;
       }
+      useLemonSketchStore.getState().setCreateSketchEntity(null);
+      useLemonSketchStore.getState().setCreateSketchPlaneEntity(null);
+      useLemonStageStore.getState().setStageMode(LemonStageMode.None);
     }
+  }
+
+  public getEntityType(): LemonDocumentType {
+    return LemonDocumentType.SketchEntity;
   }
 }

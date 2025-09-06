@@ -7,6 +7,7 @@ import type LemonScene from "../core/LemonScene";
 import type LemonDrawManager from "../draw/LemonDrawManager";
 
 export enum LemonStageMode {
+  None = "None",
   Sketch = "Sketch",
   Feature = "Feature",
 }
@@ -35,7 +36,7 @@ const useLemonStageStore = create<StageStore>()((set) => ({
   setScene: (scene) => set({ scene }),
   camera: {} as LemonCamera,
   setCamera: (camera) => set({ camera }),
-  stageMode: LemonStageMode.Feature,
+  stageMode: LemonStageMode.None,
   setStageMode: (mode) => set({ stageMode: mode }),
   interactorManager: {} as LemonInteractorManager,
   setInteractorManager: (manager) => set({ interactorManager: manager }),

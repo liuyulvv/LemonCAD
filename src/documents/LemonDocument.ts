@@ -4,6 +4,7 @@ export enum LemonDocumentType {
   PointEntity,
   LineEntity,
   PlaneEntity,
+  SketchEntity,
 }
 
 export default interface LemonDocument {

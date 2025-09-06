@@ -2,7 +2,7 @@
   {
     "type": "component",
     "name": "LemonSketchButton",
-    "filter": "Feature,Sketch"
+    "filter": "None,Sketch"
   },
   {
     "type": "component",

@@ -37,21 +37,25 @@ export default class LemonScene extends Scene {
     topPlane.id = "top-plane";
     topPlane.name = topPlane.id;
     topPlane.draw(true);
+    topPlane.setEntityName("Top Plane");
 
     const frontPlane = new LemonPlaneEntity(this.document.frontPlane);
     frontPlane.id = "front-plane";
     frontPlane.name = frontPlane.id;
     frontPlane.draw(true);
+    frontPlane.setEntityName("Front Plane");
 
     const rightPlane = new LemonPlaneEntity(this.document.rightPlane);
     rightPlane.id = "right-plane";
     rightPlane.name = rightPlane.id;
     rightPlane.draw(true);
+    rightPlane.setEntityName("Right Plane");
 
     const pointEntity = new LemonPointEntity(this.document.origin);
     pointEntity.id = "origin-point";
     pointEntity.name = pointEntity.id;
     pointEntity.draw(true);
+    pointEntity.setEntityName("Origin");
 
     this.entityManager.addEntity(topPlane);
     this.entityManager.addEntity(frontPlane);
