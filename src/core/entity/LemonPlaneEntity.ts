@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { LemonDocumentType } from "../../documents/LemonDocument";
 import LemonPlane, { type LemonPlaneJSON } from "../../geom/LemonPlane";
 import LemonVector from "../../geom/LemonVector";
+import useLemonSketchStore from "../../store/LemonSketchStore";
 import LemonEntity, { type LemonEntityDocument } from "./LemonEntity";
 
 export interface LemonPlaneEntityDocument extends LemonEntityDocument {
@@ -92,12 +93,24 @@ export default class LemonPlaneEntity extends LemonEntity {
   }
 
   public onSelected(selected: boolean): void {
+    const createSketchEntity = useLemonSketchStore.getState().createSketchEntity;
+    if (createSketchEntity) {
+      if (selected && createSketchEntity.getPlaneEntityID() == null) {
+        createSketchEntity.setPlaneEntityID(this.id);
+        useLemonSketchStore.getState().setCreateSketchPlaneEntity(this);
+      }
+    }
     super.onSelected(selected);
     if (this.planeMesh) {
       if (selected) {
         this.planeMesh.material = this.selectedMaterial;
       } else {
         this.planeMesh.material = this.defaultMaterial;
+      }
+    }
+    if (this.outlineMesh) {
+      if (!this.hoveredStatus) {
+        this.outlineMesh.material = this.outlineMaterial;
       }
     }
   }

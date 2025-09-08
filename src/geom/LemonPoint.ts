@@ -45,4 +45,13 @@ export default class LemonPoint extends LemonVector implements LemonGeomInterfac
     this.y = doc.y;
     this.z = doc.z;
   }
+
+  public clone(): LemonPoint {
+    return new LemonPoint(this.x, this.y, this.z);
+  }
+
+  public cross(other: LemonPoint): LemonPoint {
+    const result = super.cross(other);
+    return new LemonPoint(result.x, result.y, result.z);
+  }
 }

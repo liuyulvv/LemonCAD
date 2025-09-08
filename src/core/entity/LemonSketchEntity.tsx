@@ -75,7 +75,6 @@ export default class LemonSketchEntity extends LemonEntity {
   public onSelected(selected: boolean): void {
     super.onSelected(selected);
     if (selected) {
-      this.createDialog();
       useLemonSketchStore.getState().setCreateSketchEntity(this);
       useLemonStageStore.getState().setStageMode(LemonStageMode.Sketch);
       if (this.planeEntityID) {
@@ -87,8 +86,9 @@ export default class LemonSketchEntity extends LemonEntity {
         }
       } else {
         useLemonSketchStore.getState().setCreateSketchPlaneEntity(null);
-        useLemonStageStore.getState().drawManager.beginDraw(LemonDrawType.Sketch);
       }
+      useLemonStageStore.getState().drawManager.beginDraw(LemonDrawType.Sketch);
+      this.createDialog();
     } else {
       if (this.dialogID) {
         useLemonDialogStore.getState().removeDialog(this.dialogID);

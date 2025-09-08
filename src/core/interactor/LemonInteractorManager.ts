@@ -1,4 +1,6 @@
 import { Observer, PointerEventTypes, PointerInfo, type PickingInfo } from "@babylonjs/core";
+import { LemonDocumentType } from "../../documents/LemonDocument";
+import useLemonStageStore, { LemonStageMode } from "../../store/LemonStageStore";
 import type LemonEntity from "../entity/LemonEntity";
 import LemonScene from "../LemonScene";
 import type LemonInteractorFilter from "./LemonInteractorFilter";
@@ -92,7 +94,11 @@ export default class LemonInteractorManager {
     }
     const pickedEntity = this.pickEntity();
     if (pickedEntity) {
-      pickedEntity.isSelected() ? this.removePickedEntity(pickedEntity) : this.pushPickedEntity(pickedEntity);
+      if (pickedEntity.isSelected()) {
+        this.removePickedEntity(pickedEntity);
+      } else {
+        this.pushPickedEntity(pickedEntity);
+      }
     }
   }
 
@@ -170,6 +176,10 @@ export default class LemonInteractorManager {
 
   public pushPickedEntity(entity: LemonEntity) {
     this.pickedEntities.push(entity);
+    useLemonStageStore.getState().setEntities(this.pickedEntities);
+    if (useLemonStageStore.getState().stageMode == LemonStageMode.Sketch && entity.getEntityType() != LemonDocumentType.SketchEntity) {
+      return;
+    }
     entity.onSelected(true);
   }
 
@@ -179,6 +189,18 @@ export default class LemonInteractorManager {
       this.pickedEntities.splice(index, 1);
       entity.onSelected(false);
     }
+    useLemonStageStore.getState().setEntities(this.pickedEntities);
+  }
+
+  public clearPickedEntityExcept(entity: LemonEntity) {
+    this.pickedEntities = this.pickedEntities.filter((e) => {
+      if (e != entity) {
+        e.onSelected(false);
+        return false;
+      }
+      return true;
+    });
+    useLemonStageStore.getState().setEntities(this.pickedEntities);
   }
 
   public clearPickedEntities() {
@@ -186,6 +208,7 @@ export default class LemonInteractorManager {
       entity.onSelected(false);
     });
     this.pickedEntities = [];
+    useLemonStageStore.getState().setEntities(this.pickedEntities);
   }
 
   public pickEntity(): LemonEntity | null {

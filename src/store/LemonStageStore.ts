@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type LemonEntity from "../core/entity/LemonEntity";
 import type LemonEntityManager from "../core/entity/LemonEntityManager";
 import type LemonInteractorManager from "../core/interactor/LemonInteractorManager";
 import type LemonCamera from "../core/LemonCamera";
@@ -27,6 +28,8 @@ type StageStore = {
   setEntityManager: (manager: LemonEntityManager) => void;
   drawManager: LemonDrawManager;
   setDrawManager: (manager: LemonDrawManager) => void;
+  entities: Array<LemonEntity>;
+  setEntities: (entities: Array<LemonEntity>) => void;
 };
 
 const useLemonStageStore = create<StageStore>()((set) => ({
@@ -44,6 +47,8 @@ const useLemonStageStore = create<StageStore>()((set) => ({
   setEntityManager: (manager) => set({ entityManager: manager }),
   drawManager: {} as LemonDrawManager,
   setDrawManager: (manager) => set({ drawManager: manager }),
+  entities: [],
+  setEntities: (entities) => set({ entities }),
 }));
 
 export default useLemonStageStore;

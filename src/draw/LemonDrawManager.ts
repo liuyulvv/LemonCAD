@@ -5,6 +5,7 @@ import LemonDrawSketch from "./LemonDrawSketch";
 
 export default class LemonDrawManager {
   private static instance: LemonDrawManager;
+  private drawType: LemonDrawType | null = null;
   private currentDraw: LemonDrawInterface | null = null;
   private drawSketch: LemonDrawSketch;
 
@@ -19,33 +20,52 @@ export default class LemonDrawManager {
     return LemonDrawManager.instance;
   }
 
-  public beginDraw(type: LemonDrawType): void {
+  public getDrawType(): LemonDrawType | null {
+    return this.drawType;
+  }
+
+  public beginDraw(drawType: LemonDrawType): void {
     if (this.currentDraw) {
-      if (this.currentDraw.getDrawType() == type) {
+      if (this.currentDraw.getDrawType() == drawType) {
         return;
       } else {
-        useLemonStageStore.getState().interactorManager.removeFilter(this.currentDraw);
-        this.currentDraw.shutdown();
+        if (this.currentDraw.getDrawType() == LemonDrawType.Sketch && drawType >= LemonDrawType.SketchLine && drawType <= LemonDrawType.SketchLine) {
+          this.drawType = drawType;
+          this.drawSketch.beginDraw(drawType);
+          return;
+        } else {
+          useLemonStageStore.getState().interactorManager.removeFilter(this.currentDraw);
+          this.currentDraw.shutdown();
+        }
       }
     }
-    switch (type) {
+    switch (drawType) {
       case LemonDrawType.Sketch:
         this.currentDraw = this.drawSketch;
         break;
     }
-    useLemonStageStore.getState().interactorManager.insertFilter(this.currentDraw);
-    this.currentDraw.begin();
+    this.drawType = drawType;
+    if (this.currentDraw) {
+      useLemonStageStore.getState().interactorManager.insertFilter(this.currentDraw);
+      this.currentDraw.begin();
+    }
   }
 
   public endDraw(): void {
     if (this.currentDraw) {
       this.currentDraw.end();
+      useLemonStageStore.getState().interactorManager.removeFilter(this.currentDraw);
     }
     this.currentDraw = null;
+    this.drawType = null;
   }
 
   public shutdown(): void {
-    this.currentDraw?.shutdown();
-    this.currentDraw = null;
+    if (this.currentDraw) {
+      useLemonStageStore.getState().interactorManager.removeFilter(this.currentDraw);
+      this.currentDraw.shutdown();
+      this.currentDraw = null;
+      this.drawType = null;
+    }
   }
 }

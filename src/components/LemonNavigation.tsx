@@ -1,6 +1,7 @@
 import { RedoOutlined, UndoOutlined } from "@ant-design/icons";
 import { Button, Divider } from "antd";
 import React, { useEffect, useState } from "react";
+import LemonVector from "../geom/LemonVector";
 import useLemonStageStore from "../store/LemonStageStore";
 import LemonSketchButton from "./sketch/LemonSketchButton";
 import LemonSketchLineButton from "./sketch/LemonSketchLineButton";
@@ -12,9 +13,8 @@ interface NavItem {
 }
 
 function LemonNavigation() {
-  const { camera } = useLemonStageStore();
   const [navItems, setNavItems] = useState<NavItem[]>([]);
-  const { stageMode } = useLemonStageStore();
+  const { stageMode, camera } = useLemonStageStore();
 
   const customComponents: { [key: string]: React.ReactNode } = {
     LemonSketchButton: <LemonSketchButton />,
@@ -40,7 +40,7 @@ function LemonNavigation() {
       <Button
         type="text"
         onClick={() => {
-          camera.lookFromTop();
+          camera.lookAtPlane(new LemonVector(0, 0, 1));
         }}>
         Top View
       </Button>

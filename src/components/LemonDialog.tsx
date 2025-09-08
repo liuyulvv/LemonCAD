@@ -10,8 +10,8 @@ export interface LemonDialogProps {
   initialPosition?: { x: number; y: number };
   enableEdit?: boolean;
   children?: React.ReactNode;
-  onConfirm?: () => void;
-  onCancel?: () => void;
+  onConfirm: () => void;
+  onCancel: () => void;
   onTitleChange?: (title: string) => void;
 }
 
@@ -61,7 +61,6 @@ const useStyles = makeStyles({
 });
 
 export default function LemonDialog({
-  id,
   initialTitle = "Sketch",
   initialPosition = { x: 225, y: 32 },
   enableEdit = true,
@@ -73,7 +72,6 @@ export default function LemonDialog({
   const styles = useStyles();
 
   const { maxZIndex, setMaxZIndex } = useLemonDialogStore();
-  const { hideDialog } = useLemonDialogStore();
 
   const [position, setPosition] = useState(initialPosition);
   const [isDragging, setIsDragging] = useState(false);
@@ -153,7 +151,7 @@ export default function LemonDialog({
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isDragging, isResizing]);
+  }, [isDragging, isResizing, isEditing]);
 
   useEffect(() => {
     if (isEditing) {
@@ -220,8 +218,7 @@ export default function LemonDialog({
             icon={<CheckOutlined />}
             size="small"
             onClick={() => {
-              onConfirm ? onConfirm() : null;
-              hideDialog(id);
+              onConfirm();
             }}
             variant="solid"
           />
@@ -230,8 +227,7 @@ export default function LemonDialog({
             icon={<CloseOutlined />}
             size="small"
             onClick={() => {
-              onCancel ? onCancel() : null;
-              hideDialog(id);
+              onCancel();
             }}
             color="danger"
             variant="solid"

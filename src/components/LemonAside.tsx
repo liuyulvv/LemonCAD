@@ -3,39 +3,18 @@ import { Button, Tree } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { LemonDocumentType } from "../documents/LemonDocument";
 import useLemonAsideStore, { type LemonGeometryData } from "../store/LemonAsideStore";
-import useLemonStageStore from "../store/LemonStageStore";
+import useLemonSketchStore from "../store/LemonSketchStore";
+import useLemonStageStore, { LemonStageMode } from "../store/LemonStageStore";
 import LemonGeometryNode from "./LemonGeometryNode";
 
 function LemonAside() {
-  const { interactorManager, entityManager } = useLemonStageStore();
-  const { collapsed, setCollapsed, geometryData, setGeometryNodeIconVisible, selectedEntities, setSelectedEntities } = useLemonAsideStore();
+  const { interactorManager, entityManager, stageMode, entities } = useLemonStageStore();
+  const { collapsed, setCollapsed, geometryData, setGeometryNodeIconVisible } = useLemonAsideStore();
+  const { createSketchEntity } = useLemonSketchStore();
+
   const [treeNode, setTreeNode] = useState<LemonGeometryData[]>([]);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const generateTreeNodes = (data: LemonGeometryData[]): LemonGeometryData[] => {
-    return data.map((item) => {
-      if (item.selectable == undefined || item.selectable) {
-        setGeometryNodeIconVisible(item.key, false);
-        return {
-          title: <LemonGeometryNode name={item.title as string} id={item.key} />,
-          name: item.title,
-          key: item.key,
-          children: item.children ? generateTreeNodes(item.children) : [],
-          expanded: item.expanded,
-          selectable: true,
-        };
-      } else {
-        return {
-          title: item.title,
-          key: item.key,
-          selectable: false,
-          children: item.children ? generateTreeNodes(item.children) : [],
-          expanded: item.expanded,
-        };
-      }
-    });
-  };
 
   const generateExpandedKeys = (nodes: LemonGeometryData[]): string[] => {
     const keys: string[] = [];
@@ -59,11 +38,35 @@ function LemonAside() {
   };
 
   useEffect(() => {
+    const generateTreeNodes = (data: LemonGeometryData[]): LemonGeometryData[] => {
+      return data.map((item) => {
+        if (item.selectable == undefined || item.selectable) {
+          setGeometryNodeIconVisible(item.key, false);
+          return {
+            title: <LemonGeometryNode name={item.title as string} id={item.key} />,
+            name: item.title,
+            key: item.key,
+            children: item.children ? generateTreeNodes(item.children) : [],
+            expanded: item.expanded,
+            selectable: true,
+          };
+        } else {
+          return {
+            title: item.title,
+            key: item.key,
+            selectable: false,
+            children: item.children ? generateTreeNodes(item.children) : [],
+            expanded: item.expanded,
+          };
+        }
+      });
+    };
+
     const nodes = generateTreeNodes(geometryData);
     const keys = generateExpandedKeys(nodes);
     setTreeNode(nodes);
     setExpandedKeys(keys);
-  }, [geometryData]);
+  }, [geometryData, setGeometryNodeIconVisible]);
 
   return (
     <div style={{ display: "flex", height: "100%" }}>
@@ -96,8 +99,7 @@ function LemonAside() {
               }
             }
           }}
-          onSelect={(value, info) => {
-            setSelectedEntities(value as string[]);
+          onSelect={(_value, info) => {
             if (info.node.key) {
               const entity = entityManager.getEntity(info.node.key as string);
               if (entity) {
@@ -106,13 +108,18 @@ function LemonAside() {
                 }
                 if (info.selected) {
                   interactorManager.pushPickedEntity(entity);
+                  if (stageMode == LemonStageMode.Sketch && createSketchEntity) {
+                    interactorManager.clearPickedEntityExcept(createSketchEntity);
+                  }
                 } else {
                   interactorManager.removePickedEntity(entity);
                 }
               }
             }
           }}
-          selectedKeys={selectedEntities}
+          selectedKeys={entities.map((e) => {
+            return e.id;
+          })}
           onMouseEnter={(info) => {
             const key = info.node.key as string;
             if (key == "default-geometry") {

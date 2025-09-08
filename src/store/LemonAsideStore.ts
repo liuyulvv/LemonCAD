@@ -16,10 +16,6 @@ interface AsideStore {
   renameGeometryData: (key: string, title: string) => void;
   geometryNodeIconVisibleMap: Record<string, boolean>;
   setGeometryNodeIconVisible: (key: string, visible: boolean) => void;
-  selectedEntities: string[];
-  setSelectedEntities: (ids: string[]) => void;
-  pushSelectedEntity: (id: string) => void;
-  removeSelectedEntity: (id: string) => void;
 }
 
 const useLemonAsideStore = create<AsideStore>()((set) => ({
@@ -49,16 +45,6 @@ const useLemonAsideStore = create<AsideStore>()((set) => ({
   setGeometryNodeIconVisible: (key, visible) =>
     set((state) => ({
       geometryNodeIconVisibleMap: { ...state.geometryNodeIconVisibleMap, [key]: visible },
-    })),
-  selectedEntities: [],
-  setSelectedEntities: (ids) => set({ selectedEntities: ids }),
-  pushSelectedEntity: (id) =>
-    set((state) => ({
-      selectedEntities: [...new Set([...state.selectedEntities, id])],
-    })),
-  removeSelectedEntity: (id) =>
-    set((state) => ({
-      selectedEntities: state.selectedEntities.filter((eid) => eid !== id),
     })),
 }));
 

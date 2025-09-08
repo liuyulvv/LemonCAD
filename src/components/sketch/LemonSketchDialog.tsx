@@ -17,7 +17,7 @@ export default function LemonSketchDialog({ dialogID, initialTitle, onConfirm, o
   const { removeDialog } = useLemonDialogStore();
   const {
     createSketchNumber,
-    setCreateSketchNumber,
+    updateCreateSketchNumber,
     createSketchName,
     setCreateSketchName,
     createSketchEntity,
@@ -40,8 +40,8 @@ export default function LemonSketchDialog({ dialogID, initialTitle, onConfirm, o
         } else {
           createSketchEntity?.setSketchName(createSketchName);
           drawManager.endDraw();
-          setCreateSketchName("Sketch" + (createSketchNumber + 1));
-          setCreateSketchNumber(createSketchNumber + 1);
+          updateCreateSketchNumber();
+          setCreateSketchName("Sketch" + createSketchNumber);
           removeDialog(dialogID);
           setTip("");
         }

@@ -9,6 +9,9 @@ import {
   type Nullable,
   type PointerTouch,
 } from "@babylonjs/core";
+import { LemonDrawType } from "../draw/LemonDrawInterface";
+import LemonVector from "../geom/LemonVector";
+import useLemonStageStore from "../store/LemonStageStore";
 
 class LemonArcRotateCameraPointersInput extends BaseCameraPointersInput {
   public camera!: ArcRotateCamera;
@@ -66,6 +69,10 @@ class LemonArcRotateCameraPointersInput extends BaseCameraPointersInput {
         this.camera.target.addInPlace(offset);
       }
     } else if (this.isRotateClick) {
+      const drawType = useLemonStageStore.getState().drawManager.getDrawType();
+      if (drawType && drawType >= LemonDrawType.SketchLine && drawType <= LemonDrawType.SketchLine) {
+        return;
+      }
       this.camera.inertialAlphaOffset -= offsetX / this.angularSensibilityX;
       this.camera.inertialBetaOffset -= offsetY / this.angularSensibilityY;
     }
@@ -96,7 +103,7 @@ export default class LemonCamera extends ArcRotateCamera {
     this.lowerRadiusLimit = 0.1;
     this.upperRadiusLimit = 100;
 
-    this.lookFromTop();
+    this.lookAtPlane(new LemonVector(0, 0, 1));
 
     this._scene.onBeforeRenderObservable.add(() => {
       const engine = this._scene.getEngine();
@@ -113,8 +120,9 @@ export default class LemonCamera extends ArcRotateCamera {
     });
   }
 
-  public lookFromTop(): void {
-    this.beta = 0;
-    this.alpha = Math.PI / 2;
+  public lookAtPlane(zDirection: Vector3): void {
+    const radius = this.radius;
+    const newPosition = zDirection.scale(radius);
+    this.setPosition(newPosition);
   }
 }

@@ -22,7 +22,7 @@ export default class LemonMaterialManager {
   }
 
   public getMaterial(color: string): StandardMaterial {
-    let material = new StandardMaterial(uuidv4());
+    const material = new StandardMaterial(uuidv4());
     material.emissiveColor = Color3.FromHexString(color);
     material.backFaceCulling = false;
     return material;

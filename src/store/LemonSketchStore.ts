@@ -4,7 +4,7 @@ import type LemonSketchEntity from "../core/entity/LemonSketchEntity";
 
 interface SketchStore {
   createSketchNumber: number;
-  updateCreateSketchNumber: (number: number) => void;
+  updateCreateSketchNumber: () => void;
   createSketchName: string;
   setCreateSketchName: (name: string) => void;
   createSketchEntity: LemonSketchEntity | null;
@@ -15,7 +15,7 @@ interface SketchStore {
 
 const useLemonSketchStore = create<SketchStore>((set) => ({
   createSketchNumber: 1,
-  updateCreateSketchNumber: (createSketchNumber) => set({ createSketchNumber: createSketchNumber + 1 }),
+  updateCreateSketchNumber: () => set((state) => ({ createSketchNumber: state.createSketchNumber + 1 })),
   createSketchName: "Sketch1",
   setCreateSketchName: (name) => set({ createSketchName: name }),
   createSketchEntity: null,

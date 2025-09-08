@@ -2,12 +2,13 @@ import { Logger } from "@babylonjs/core";
 import { useEffect, useRef } from "react";
 import LemonEngine from "../core/LemonEngine";
 import LemonScene from "../core/LemonScene";
+import LemonDrawManager from "../draw/LemonDrawManager";
 import useLemonStageStore from "../store/LemonStageStore";
 
 export default function LemonCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mainCanvas = useRef<HTMLCanvasElement>(null);
-  const { setEngine, setScene } = useLemonStageStore();
+  const { scene, setEngine, setScene, setCamera, setInteractorManager, setEntityManager, setDrawManager } = useLemonStageStore();
 
   useEffect(() => {
     Logger.LogLevels = Logger.ErrorLogLevel;
@@ -28,6 +29,10 @@ export default function LemonCanvas() {
 
       setEngine(engine);
       setScene(scene);
+      setCamera(scene.getCamera());
+      setInteractorManager(scene.getInteractorManager());
+      setEntityManager(scene.getEntityManager());
+      setDrawManager(LemonDrawManager.getInstance());
 
       engine.runRenderLoop(() => {
         scene.render();
@@ -64,13 +69,24 @@ export default function LemonCanvas() {
             cleanup();
           }
         })
-        .catch((_err) => {
+        .catch((err) => {
+          console.error("Failed to initialize LemonEngine:", err);
           if (engine) {
             engine.dispose();
           }
         });
     };
   }, []);
+
+  useEffect(() => {
+    if (scene.init) {
+      scene.init();
+      setCamera(scene.getCamera());
+      setInteractorManager(scene.getInteractorManager());
+      setEntityManager(scene.getEntityManager());
+      setDrawManager(LemonDrawManager.getInstance());
+    }
+  }, [scene]);
 
   return (
     <div
@@ -80,8 +96,7 @@ export default function LemonCanvas() {
         flexGrow: "1",
         width: "100%",
         height: "100%",
-      }}
-    >
+      }}>
       <canvas
         ref={mainCanvas}
         style={{
@@ -92,8 +107,7 @@ export default function LemonCanvas() {
           height: "100%",
           outline: "none",
         }}
-        tabIndex={0}
-      ></canvas>
+        tabIndex={0}></canvas>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { Mesh, Scene, StandardMaterial } from "@babylonjs/core";
 import { v4 as uuidv4 } from "uuid";
 import type LemonDocument from "../../documents/LemonDocument";
 import { LemonDocumentType } from "../../documents/LemonDocument";
-import useLemonAsideStore from "../../store/LemonAsideStore";
+import useLemonStageStore from "../../store/LemonStageStore";
 import LemonMaterialManager from "../LemonMaterialManager";
 
 export interface LemonEntityDocument extends LemonDocument {
@@ -27,6 +27,18 @@ export default class LemonEntity extends Mesh {
     this.defaultMaterial = LemonMaterialManager.getInstance().getDefaultMaterial();
     this.selectedMaterial = LemonMaterialManager.getInstance().getSelectedMaterial();
     this.hoveredMaterial = LemonMaterialManager.getInstance().getHoveredMaterial();
+    useLemonStageStore.getState().entityManager.addEntity(this);
+  }
+
+  public getEntityID(): string {
+    return this.entityID;
+  }
+
+  public setEntityID(id: string): void {
+    useLemonStageStore.getState().entityManager.removeEntity(this.entityID);
+    this.entityID = id;
+    this.id = id;
+    useLemonStageStore.getState().entityManager.addEntity(this);
   }
 
   public getEntityName(): string {
@@ -51,7 +63,7 @@ export default class LemonEntity extends Mesh {
   }
 
   public getParentEntity(): LemonEntity | null {
-    let parent = this.parent as LemonEntity;
+    const parent = this.parent as LemonEntity;
     return parent || null;
   }
 
@@ -75,9 +87,7 @@ export default class LemonEntity extends Mesh {
     this.selectedStatus = selected;
     if (selected) {
       this.material = this.selectedMaterial;
-      useLemonAsideStore.getState().pushSelectedEntity(this.id);
     } else {
-      useLemonAsideStore.getState().removeSelectedEntity(this.id);
       if (this.hoveredStatus) {
         this.material = this.hoveredMaterial;
       } else {
@@ -103,6 +113,7 @@ export default class LemonEntity extends Mesh {
     this.defaultMaterial.dispose();
     this.selectedMaterial.dispose();
     this.hoveredMaterial.dispose();
+    useLemonStageStore.getState().entityManager.removeEntity(this.id);
   }
 
   public getEntityType(): LemonDocumentType {

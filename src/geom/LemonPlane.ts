@@ -31,6 +31,16 @@ export default class LemonPlane implements LemonGeomInterface {
     this.buildTransform();
   }
 
+  public static fromAxis(origin: LemonPoint, xAxis: LemonPoint, yAxis: LemonPoint): LemonPlane {
+    const plane = new LemonPlane();
+    plane.origin = origin.clone();
+    plane.xAxis = xAxis.clone().normalize();
+    plane.yAxis = yAxis.clone().normalize();
+    plane.zAxis = plane.xAxis.clone().cross(plane.yAxis).normalize();
+    plane.buildTransform();
+    return plane;
+  }
+
   public static topPlane(): LemonPlane {
     const plane = new LemonPlane();
     return plane;
@@ -69,6 +79,10 @@ export default class LemonPlane implements LemonGeomInterface {
 
   public geomType(): LemonGeomType {
     return LemonGeomType.Plane;
+  }
+
+  public getNormal(): LemonPoint {
+    return this.zAxis.clone().normalize();
   }
 
   public discrete(): LemonGeomDiscreteness {
@@ -150,7 +164,7 @@ export default class LemonPlane implements LemonGeomInterface {
     const rightBottom = leftBottom.clone().add(this.xAxis.clone().normalize().scale(width));
 
     const result: Array<LemonGeomDiscreteness> = [];
-    let discreteness = new LemonGeomDiscreteness();
+    const discreteness = new LemonGeomDiscreteness();
     discreteness.vertices = [leftTop.x, leftTop.y, leftTop.z, leftBottom.x, leftBottom.y, leftBottom.z];
     discreteness.vertices.push(rightBottom.x, rightBottom.y, rightBottom.z);
     discreteness.vertices.push(rightTop.x, rightTop.y, rightTop.z);
