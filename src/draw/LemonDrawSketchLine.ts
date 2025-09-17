@@ -67,6 +67,7 @@ export default class LemonDrawSketchLine implements LemonDrawInterface {
 
   public shutdown(): void {
     for (const lineEntity of this.lineEntities) {
+      this.sketchEntity?.removeEntity(lineEntity);
       lineEntity.dispose();
     }
     this.lineEntities = [];
@@ -95,6 +96,7 @@ export default class LemonDrawSketchLine implements LemonDrawInterface {
         this.currentLineEntity.updateLine(new LemonLine(this.pointA, this.pointB));
         this.currentLineEntity.draw();
         this.lineEntities.push(this.currentLineEntity);
+        this.sketchEntity.addEntity(this.currentLineEntity);
         this.pointA = this.pointB;
         this.currentLineEntity = new LemonLineEntity(new LemonLine(this.pointA));
       }

@@ -12,6 +12,7 @@ export default class LemonSketchEntity extends LemonEntity {
   private sketchName: string;
   private planeEntityID: string | null = null;
   private dialogID: string | null = null;
+  private entities: Array<LemonEntity> = [];
 
   public constructor() {
     super();
@@ -98,6 +99,18 @@ export default class LemonSketchEntity extends LemonEntity {
       useLemonSketchStore.getState().setCreateSketchPlaneEntity(null);
       useLemonStageStore.getState().setStageMode(LemonStageMode.None);
     }
+  }
+
+  public addEntity(entity: LemonEntity) {
+    this.entities.push(entity);
+  }
+
+  public getEntities(): Array<LemonEntity> {
+    return this.entities;
+  }
+
+  public removeEntity(entity: LemonEntity) {
+    this.entities = this.entities.filter((e) => e.id != entity.id);
   }
 
   public getEntityType(): LemonDocumentType {

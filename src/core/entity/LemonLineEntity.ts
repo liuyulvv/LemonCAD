@@ -22,7 +22,7 @@ export default class LemonLineEntity extends LemonEntity {
     this.onBeforeRenderObserver = this.scene.onBeforeRenderObservable.add(() => {
       const camera = this.scene.activeCamera;
       if (camera && this.position) {
-        const scale = camera.orthoTop! / 30;
+        const scale = camera.orthoTop! / 10;
         if (this.lineMesh) {
           this.lineMesh = MeshBuilder.CreateTube(uuidv4(), {
             path: this.lineMeshPoints,
@@ -71,6 +71,18 @@ export default class LemonLineEntity extends LemonEntity {
       this.addChild(this.lineMesh);
       this.drawNeedUpdate = false;
       return;
+    }
+  }
+
+  public onHovered(hovered: boolean): void {
+    super.onHovered(hovered);
+    if (this.selectedStatus || !this.lineMesh) {
+      return;
+    }
+    if (hovered) {
+      this.lineMesh.material = this.hoveredMaterial;
+    } else {
+      this.lineMesh.material = this.defaultMaterial;
     }
   }
 
